@@ -273,7 +273,7 @@
         { transform: shakeAt(-4, 3) }, { transform: shakeAt(3, -2) }, { transform: shakeAt(0, 0) }
       ], { duration: 380, delay: T.slam + 250, easing: 'ease-out' });
 
-      // 2. the camera pulls back to the home view (the full board; on a phone, the title card at screen width)
+      // 2. the camera pulls back to the home view (the full board)
       var cameraDone = new Promise(function (resolve) {
         later(T.pull, function () { Camera.goHome({ duration: T.pullMs }).then(resolve); });
       });
