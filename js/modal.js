@@ -21,7 +21,7 @@
 
   var LIFT = 1.05;        // card scale while lifted
   var PERSPECTIVE = 1400; // px, for the card flip
-  var STATE = { CLOSED: 'closed', FLYING: 'flying', REVEALING: 'revealing', OPEN: 'open', NAVIGATING: 'navigating', CLOSING: 'closing' };
+  var STATE = { CLOSED: 'closed', FLYING: 'flying', REVEALING: 'revealing', OPEN: 'open', NAVIGATING: 'navigating', FACE: 'face', CLOSING: 'closing' };
 
   function init() {
     var data = window.CASE;
@@ -34,6 +34,7 @@
     var returnView = null;     // camera view before the first open
     var wantClose = false;     // close was asked for mid-transition
     var suppressFocusPan = false;
+    var faceFade = null;       // backdrop dimming while the card front shows
     var cardAnims = [];        // flip animations held on the current card
     var inertNodes = [];
     var mode = 'board';        // 'board' (camera + card flip) or 'list' (plain fade)
@@ -183,13 +184,22 @@
     foot.appendChild(linksEl);
     foot.appendChild(navEl);
 
+    // board view: swap the case file for the card's front (and back again)
+    var flipBtn = el('button', 'dossier__flip', 'VIEW CARD FRONT');
+    flipBtn.type = 'button';
+    var faceBtn = el('button', 'dossier__face', 'READ THE FILE');
+    faceBtn.type = 'button';
+    faceBtn.hidden = true;
+
     panel.appendChild(tab);
+    panel.appendChild(flipBtn);
     panel.appendChild(closeBtn);
     panel.appendChild(head);
     panel.appendChild(bodyEl);
     panel.appendChild(foot);
     dossier.appendChild(backdrop);
     dossier.appendChild(panel);
+    dossier.appendChild(faceBtn);
     document.body.appendChild(dossier);
 
     // ---- rendering the case file ---------------------------------------
@@ -275,6 +285,7 @@
       var n = tour.length;
       var index = tour.indexOf(c.id) + 1;
       tab.textContent = 'FILE ' + pad(index) + ' / ' + pad(n);
+      flipBtn.hidden = mode === 'list';      // the list view has no card to look at
       labelEl.textContent = data.site.caseNo + ' · ' + c.label;
       titleEl.textContent = c.title;
       subtitleEl.textContent = c.subtitle || '';
@@ -376,6 +387,51 @@
         return finished(play(panel, panelFrames(g, false), {
           duration: fast ? 360 : 480, easing: 'cubic-bezier(.2,.7,.2,1)'
         }));
+      }).then(function () {
+        state = STATE.OPEN;
+        panel.focus({ preventScroll: true });
+        if (wantClose) { wantClose = false; close(); }
+      });
+    }
+
+    // The case file turns away and the card shows its front, with no timer: it stays
+    // until the reader asks for the file again (button, backdrop click or Esc).
+    function showFace() {
+      if (state !== STATE.OPEN || mode === 'list') return;
+      state = STATE.NAVIGATING;
+      var card = cardEl(current);
+      var c = byId(current);
+      var g = geometry(card, c);
+      var out = play(panel, panelFrames(g, true), { duration: 300, easing: 'ease-in', fill: 'forwards' });
+      finished(out).then(function () {
+        panel.style.opacity = '0';
+        panel.style.visibility = 'hidden';
+        cancel(out);
+        faceFade = play(backdrop, [{ opacity: 1 }, { opacity: 0.3 }], { duration: 250, fill: 'forwards' });
+        if (!faceFade) backdrop.style.opacity = '0.3';
+        return finished(flipCard(card, c, 90, 0, 250, 'ease-out'));
+      }).then(function () {
+        state = STATE.FACE;
+        faceBtn.hidden = false;
+        faceBtn.focus({ preventScroll: true });
+        if (wantClose) { wantClose = false; showFile(); }
+      });
+    }
+
+    function showFile() {
+      if (state !== STATE.FACE) return;
+      state = STATE.NAVIGATING;
+      faceBtn.hidden = true;
+      var card = cardEl(current);
+      var c = byId(current);
+      cancel(faceFade);
+      faceFade = null;
+      backdrop.style.opacity = '';
+      finished(flipCard(card, c, 0, 90, 250, 'ease-in')).then(function () {
+        panel.style.visibility = '';
+        var g = geometry(card, c);
+        panel.style.opacity = '';
+        return finished(play(panel, panelFrames(g, false), { duration: 400, easing: 'cubic-bezier(.2,.7,.2,1)' }));
       }).then(function () {
         state = STATE.OPEN;
         panel.focus({ preventScroll: true });
@@ -540,6 +596,7 @@
     }
 
     function close() {
+      if (state === STATE.FACE) { showFile(); return; }
       if (mode === 'list') {
         if (state === STATE.OPEN) closeList();
         else if (state === STATE.REVEALING || state === STATE.NAVIGATING) wantClose = true;
@@ -632,6 +689,8 @@
 
     backdrop.addEventListener('click', close);
     closeBtn.addEventListener('click', close);
+    flipBtn.addEventListener('click', showFace);
+    faceBtn.addEventListener('click', showFile);
 
     navEl.addEventListener('click', function (e) {
       var b = e.target.closest('button[data-go]');
@@ -654,6 +713,11 @@
       if (e.key === 'Escape') {
         e.preventDefault();
         close();
+        return;
+      }
+
+      if (state === STATE.FACE) {
+        if (e.key === 'Tab') { e.preventDefault(); faceBtn.focus(); }
         return;
       }
 
