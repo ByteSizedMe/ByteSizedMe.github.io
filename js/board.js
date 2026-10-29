@@ -38,8 +38,48 @@
 
   // ---- cards ----------------------------------------------------------
 
+  function isTodo(text) { return /^TODO/.test(text); }
+
+  function makeIcon(name) {
+    var svg = document.createElementNS(SVG_NS, 'svg');
+    svg.setAttribute('class', 'card__icon');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('aria-hidden', 'true');
+    svg.setAttribute('focusable', 'false');
+    svg.innerHTML = data.icons[name] || '';
+    return svg;
+  }
+
+  function makeTags(tags) {
+    var row = el('span', 'card__tags');
+    (tags || []).forEach(function (t) {
+      row.appendChild(el('span', 'tag' + (isTodo(t) ? ' is-todo' : ''), t));
+    });
+    return row;
+  }
+
+  function makePreview(rows) {
+    var list = el('span', 'card__preview');
+    (rows || []).forEach(function (r) {
+      list.appendChild(el('span', 'pv__k', r[0]));
+      list.appendChild(el('span', 'pv__v' + (isTodo(r[1]) ? ' is-todo' : ''), r[1]));
+    });
+    return list;
+  }
+
+  /*
+   * Each card stacks zoom layers. js/content.js drives them, CSS fades them by
+   * the board's data-zoom-level:
+   *   lvl-far  icon + title        (far only)
+   *   lvl-head label + title       (mid, near)
+   *   lvl-mid  tags + summary      (mid only)
+   *   lvl-near content preview     (near only)
+   *   lvl-keep redaction bars      (mid, near)
+   * On a polaroid the tags / preview / icon live on the photo instead.
+   */
   function makeCard(c) {
     var card = el('button', 'card card--' + c.type + (c.variant ? ' card--' + c.variant : ''));
+    var polaroid = c.type === 'polaroid';
     card.type = 'button';
     card.dataset.id = c.id;
     card.setAttribute('aria-label', c.title + ': ' + c.summary);
@@ -60,23 +100,52 @@
     }
     card.appendChild(fixture);
 
-    if (c.type === 'polaroid') {
+    var far = el('span', 'lvl-far');
+    far.setAttribute('aria-hidden', 'true');
+    far.appendChild(makeIcon(c.icon));
+    far.appendChild(el('span', 'lvl-far__title', c.title));
+
+    if (polaroid) {
       var media = el('span', 'card__media');
       media.setAttribute('aria-hidden', 'true');
       media.appendChild(el('span', 'card__placeholder', 'IMAGE: TODO'));
+      media.appendChild(far);
+      var mediaTags = makeTags(c.tags);
+      mediaTags.classList.add('lvl-mid');
+      media.appendChild(mediaTags);
+      var mediaPreview = makePreview(c.preview);
+      mediaPreview.classList.add('lvl-near');
+      media.appendChild(mediaPreview);
       card.appendChild(media);
+    } else {
+      card.appendChild(far);
     }
 
     var body = el('span', 'card__body');
-    body.appendChild(el('span', 'card__label', c.label));
-    body.appendChild(el('span', 'card__title', c.title));
-    if (c.subtitle) body.appendChild(el('span', 'card__subtitle', c.subtitle));
-    body.appendChild(el('span', 'card__summary', c.summary));
-    if (c.status) body.appendChild(el('span', 'card__status', c.status));
+
+    var head = el('span', 'lvl-head');
+    head.appendChild(el('span', 'card__label', c.label));
+    head.appendChild(el('span', 'card__title', c.title));
+    if (c.subtitle) head.appendChild(el('span', 'card__subtitle', c.subtitle));
+    body.appendChild(head);
+
+    var detail = el('span', 'card__detail');
+    var mid = el('span', 'lvl-mid');
+    if (!polaroid) mid.appendChild(makeTags(c.tags));
+    mid.appendChild(el('span', 'card__summary', c.summary));
+    if (c.status) mid.appendChild(el('span', 'card__status', c.status));
+    detail.appendChild(mid);
+    if (!polaroid) {
+      var near = el('span', 'lvl-near');
+      near.appendChild(makePreview(c.preview));
+      detail.appendChild(near);
+    }
+    body.appendChild(detail);
+
     if (c.redacted) {
-      var bars = el('span', 'redactions');
+      var bars = el('span', 'redactions lvl-keep');
       bars.setAttribute('aria-hidden', 'true');
-      [86, 64, 92, 48].forEach(function (pct) {
+      [86, 64, 92].forEach(function (pct) {
         var bar = el('span', 'redactions__bar');
         bar.style.width = pct + '%';
         bars.appendChild(bar);
@@ -165,4 +234,28 @@
 
   world.style.width = W + 'px';
   world.style.height = H + 'px';
+
+  // ---- semantic zoom --------------------------------------------------
+
+  var zl = data.zoomLevels;
+  var level = null;
+
+  function levelFor(k, current) {
+    var h = zl.hysteresis || 0;
+    if (current === 'far') return k >= zl.mid + h ? levelFor(k, 'mid') : 'far';
+    if (current === 'mid') {
+      if (k < zl.mid - h) return 'far';
+      return k >= zl.near + h ? 'near' : 'mid';
+    }
+    if (current === 'near') return k < zl.near - h ? levelFor(k, 'mid') : 'near';
+    return k < zl.mid ? 'far' : k < zl.near ? 'mid' : 'near';
+  }
+
+  // camera.js calls this on every camera change; the DOM is only touched when the level changes
+  window.Camera.onChange(function (cam) {
+    var next = levelFor(cam.k, level);
+    if (next === level) return;
+    level = next;
+    world.setAttribute('data-zoom-level', level);
+  });
 })();

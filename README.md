@@ -21,6 +21,13 @@ python3 -m http.server 8000
 Repo Settings, Pages, deploy from branch `main` at `/ (root)`. All asset paths are
 relative, so it also works under a `/repo-name` subpath.
 
+## Card content and zoom levels
+
+Each card in `js/content.js` has a `summary`, `tags`, a near-zoom `preview`, dossier
+`detail` sections, `links`, `zoomFocus` and `related` ids. `TODO` marks anything still
+to fill in. The board shows cards at three zoom levels (`zoomLevels` in the same file):
+far = icon + title, mid = + tags and summary, near = + content preview.
+
 ## Controls
 
 Drag the wall to pan. Wheel / trackpad pinch / touch pinch zooms. Arrow keys pan,
@@ -28,4 +35,4 @@ Drag the wall to pan. Wheel / trackpad pinch / touch pinch zooms. Arrow keys pan
 
 ## Status
 
-Batch 2 of 7 (camera: pan, zoom, HUD, minimap). See `SPEC.md` for the plan.
+Batch 3 of 7 (card content, semantic zoom). See `SPEC.md` for the plan.

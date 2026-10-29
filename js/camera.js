@@ -6,10 +6,20 @@
  * strings follow for free and are never re-rendered while the camera moves.
  *
  * Camera state is { x, y, k }: world origin position in screen px, and scale.
- * Public API: window.Camera = { flyTo, fitAll, reset, zoomBy, getState }.
+ * Public API: window.Camera = { flyTo, fitAll, reset, zoomBy, getState, onChange }.
+ * onChange(fn) calls fn(state) on every camera change; it can be called before init.
  */
 (function () {
   'use strict';
+
+  var listeners = [];
+  var liveState = null;   // set once init has run
+  window.Camera = {
+    onChange: function (fn) {
+      listeners.push(fn);
+      if (liveState) fn(liveState);
+    }
+  };
 
   var MIN_K = 0.3;          // hard floor, lowered on small screens so FIT ALL always fits
   var MAX_K = 2.5;
@@ -37,6 +47,7 @@
     var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
     var cam = { x: 0, y: 0, k: 1 };
+    liveState = cam;
     var vw = 0;
     var vh = 0;
     var minK = MIN_K;
@@ -116,6 +127,7 @@
       var pct = Math.round(cam.k * 100) + '%';
       if (readout && pct !== lastPercent) { readout.textContent = pct; lastPercent = pct; }
       updateMinimap();
+      for (var i = 0; i < listeners.length; i++) listeners[i](cam);
     }
 
     function setView(x, y, k) {
@@ -589,13 +601,11 @@
     measure();
     setViewFromCenter(fit.cx, fit.cy, fit.k);
 
-    window.Camera = {
-      flyTo: flyTo,
-      fitAll: fitAll,
-      reset: reset,
-      zoomBy: zoomBy,
-      getState: function () { return { x: cam.x, y: cam.y, k: cam.k }; }
-    };
+    window.Camera.flyTo = flyTo;
+    window.Camera.fitAll = fitAll;
+    window.Camera.reset = reset;
+    window.Camera.zoomBy = zoomBy;
+    window.Camera.getState = function () { return { x: cam.x, y: cam.y, k: cam.k }; };
   }
 
   // board.js (loaded after this file) renders the cards; wait for it.
