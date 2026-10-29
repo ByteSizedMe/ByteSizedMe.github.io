@@ -14,7 +14,8 @@ window.CASE = {
   world: { width: 3000, height: 2000 },
 
   site: {
-    name: 'Byte',
+    name: 'Malhar Srivatsav',
+    shortName: 'Malhar',                 // used where the full name is too long
     tagline: 'Software Engineer: Application Security & Mobile',
     caseNo: 'CASE FILE No. 001'
   },
@@ -103,6 +104,7 @@ window.CASE = {
    * Card fields
    *   type:      dossier | index | polaroid | sticky | folder
    *   variant:   optional paper variant (dossier: 'washi')
+   *   shortTitle: optional shorter title for tight spots (far zoom, previous / next buttons)
    *   label:     small caps line above the title
    *   icon:      key of `icons`
    *   summary:   one line shown at mid zoom (and read out by screen readers)
@@ -127,7 +129,8 @@ window.CASE = {
       type: 'dossier',
       label: 'SUBJECT FILE',
       icon: 'person',
-      title: 'Byte',
+      title: 'Malhar Srivatsav',
+      shortTitle: 'Malhar',       // far zoom, previous / next buttons, OPEN FILE
       subtitle: 'Software Engineer: Application Security & Mobile',
       summary: 'BTech CS student at Manipal Institute of Technology Bangalore. Graduating May 2028.',
       tags: ['APPSEC', 'MOBILE', 'CLASS OF 2028'],

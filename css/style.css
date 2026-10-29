@@ -375,7 +375,7 @@ body.dossier-open .string__pulse { animation-play-state: paused; }
 }
 
 /* the slate dossier is the hero card: big name */
-.card--dossier:not(.card--washi) .card__title { font-size: 128px; margin-top: 18px; letter-spacing: 0.04em; }
+.card--dossier:not(.card--washi) .card__title { font-size: 70px; margin-top: 18px; letter-spacing: 0.02em; overflow-wrap: anywhere; }
 .card--dossier:not(.card--washi) .card__subtitle { font-size: 28px; color: var(--yellow); }
 
 /* washi variant: tea-stained, fibrous */
@@ -560,7 +560,7 @@ body.dossier-open .string__pulse { animation-play-state: paused; }
   color: var(--ink-light);
 }
 
-.card--dossier:not(.card--washi) { --far-size: 128px; }
+.card--dossier:not(.card--washi) { --far-size: 104px; }
 .card--washi { --far-size: 76px; }
 .card--index { --far-size: 44px; }
 .card--sticky { --far-size: 70px; }
@@ -1213,8 +1213,10 @@ body.intro-running .view-switch { visibility: hidden; }
 /* list view: nothing but text, no camera, strings or effects */
 .list-view { display: none; }
 
-html.list-mode,
-html.list-mode body { overflow: auto; height: auto; }
+/* the page itself scrolls in list view. body must NOT be a scroll container with
+   overscroll-behavior: none (the board's setting), or wheel / trackpad scrolling dies at body */
+html.list-mode { overflow: auto; height: auto; overscroll-behavior: auto; }
+html.list-mode body { overflow: visible; height: auto; overscroll-behavior: auto; }
 
 html.list-mode .list-view {
   display: block;

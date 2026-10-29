@@ -267,7 +267,7 @@
       capEl.appendChild(document.createTextNode(cap));
       if (dir === 'next') capEl.appendChild(el('span', null, ' >')).setAttribute('aria-hidden', 'true');
       b.appendChild(capEl);
-      b.appendChild(el('span', 'dossier__navtitle', target.title));
+      b.appendChild(el('span', 'dossier__navtitle', target.shortTitle || target.title));
       return b;
     }
 
@@ -450,7 +450,7 @@
       setHighlight(id);
       openBtn.textContent = '';
       openBtn.appendChild(el('span', 'open-btn__cap', 'OPEN FILE'));
-      openBtn.appendChild(el('span', 'open-btn__title', c.title));
+      openBtn.appendChild(el('span', 'open-btn__title', c.shortTitle || c.title));
       openBtn.hidden = false;
       Camera.flyTo(id).then(function (arrived) {
         if (selectedId !== id) return;            // another card was chosen meanwhile
