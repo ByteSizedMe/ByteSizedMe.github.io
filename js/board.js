@@ -1,13 +1,12 @@
 /*
  * board.js: renders cards, stamps and strings from js/content.js into #world.
- * Batch 1: static layout only. No camera, drag or animation yet.
+ * Pan/zoom lives in camera.js, which transforms #world. Drag comes later.
  */
 (function () {
   'use strict';
 
   var data = window.CASE;
   var SVG_NS = 'http://www.w3.org/2000/svg';
-  var viewport = document.getElementById('viewport');
   var world = document.getElementById('world');
   var svg = document.getElementById('strings');
   var W = data.world.width;
@@ -152,17 +151,6 @@
     });
   }
 
-  // ---- fit world to viewport (simple CSS scale; real camera is Batch 2) -
-
-  function fit() {
-    var vw = viewport.clientWidth;
-    var vh = viewport.clientHeight;
-    var scale = Math.min(vw / W, vh / H);
-    world.style.setProperty('--fit', scale);
-    world.style.setProperty('--tx', (vw - W * scale) / 2 + 'px');
-    world.style.setProperty('--ty', (vh - H * scale) / 2 + 'px');
-  }
-
   // ---- init -----------------------------------------------------------
 
   renderStrings();
@@ -177,6 +165,4 @@
 
   world.style.width = W + 'px';
   world.style.height = H + 'px';
-  fit();
-  window.addEventListener('resize', fit);
 })();

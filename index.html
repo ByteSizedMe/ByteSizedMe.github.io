@@ -21,6 +21,18 @@
     </div>
   </main>
 
+  <div id="hud" class="hud" role="group" aria-label="Camera controls">
+    <button type="button" class="hud__btn" data-cam="zoom-out" aria-label="Zoom out">&minus;</button>
+    <button type="button" class="hud__btn" data-cam="zoom-in" aria-label="Zoom in">+</button>
+    <span class="hud__zoom"><span class="hud__zoom-label">ZOOM</span> <output id="zoom-readout" aria-live="off">100%</output></span>
+    <button type="button" class="hud__btn hud__btn--wide" data-cam="fit" aria-label="Fit all cards in view">FIT ALL</button>
+    <button type="button" class="hud__btn hud__btn--wide" data-cam="reset" aria-label="Reset view to the subject file at 100 percent">RESET</button>
+  </div>
+
+  <div id="minimap" class="minimap" aria-hidden="true">
+    <div id="minimap-view" class="minimap__view"></div>
+  </div>
+
   <noscript><p class="noscript">This case board needs JavaScript. Contact: see README.</p></noscript>
 
   <script src="js/content.js"></script>
