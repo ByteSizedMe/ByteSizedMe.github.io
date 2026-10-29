@@ -111,7 +111,7 @@
     // the far layer's title is the card's accessible name at far zoom, so it is NOT aria-hidden
     var far = el('span', 'lvl-far');
     far.appendChild(makeIcon(c.icon));
-    far.appendChild(el('span', 'lvl-far__title', c.title));
+    far.appendChild(el('span', 'lvl-far__title', c.shortTitle || c.title));
 
     if (polaroid) {
       var media = el('span', 'card__media');
