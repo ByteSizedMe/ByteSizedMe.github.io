@@ -43,6 +43,15 @@ it connects to. Strings sway gently when the board is idle and twang when a card
 dropped; both stop under `prefers-reduced-motion`, in a hidden tab, while the camera
 moves, and while a dossier is open.
 
+## Intro and atmosphere
+
+The intro plays once per session (never under reduced motion): it opens tight on the
+Subject File, the stamp slams, then the camera pulls back while the strings draw in and
+the cards drop. SKIP INTRO or Esc ends it. Add `?intro=1` to the URL to replay it,
+`?intro=0` to skip it. The Japan layer (sun circle, petals), hanko seals, vertical
+labels and washi texture are set per card in `js/content.js`; set
+`atmosphere.petals.count` to 0 to turn the petals off.
+
 ## Controls
 
 Drag the wall to pan. Wheel / trackpad pinch / touch pinch zooms. Arrow keys pan,
@@ -50,4 +59,4 @@ Drag the wall to pan. Wheel / trackpad pinch / touch pinch zooms. Arrow keys pan
 
 ## Status
 
-Batch 5 of 7 (dragging, hover, string motion). See `SPEC.md` for the plan.
+Batch 6 of 7 (intro and atmosphere). See `SPEC.md` for the plan.
