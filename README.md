@@ -49,7 +49,7 @@ Each entry in `cards` looks like this (see the comment at the top of the file fo
 
 ```js
 {
-  id: 'vault',                  // unique name, used in connections and related
+  id: 'vault',                  // unique name, used in connections and the tour
   type: 'polaroid',             // dossier | index | polaroid | sticky | folder
   label: 'EXHIBIT A',           // small line above the title
   icon: 'shield',               // a key of `icons`
@@ -60,7 +60,6 @@ Each entry in `cards` looks like this (see the comment at the top of the file fo
   x: 1950, y: 430, w: 400, h: 540, rot: -3, // centre position, size, tilt (world is 3000 x 2000)
   fixture: 'tape', pin: { x: 0.5, y: 0.03 },// pin or tape, and where the string attaches
   zoomFocus: 1.4,               // zoom used when the camera flies to it
-  related: ['tech', 'sentinel'],// ids for previous / next file in the case file
   detail: { sections: [ { heading: 'OVERVIEW', text: '...' } ] },  // the case file
   links: [ { label: 'Google Play', url: 'TODO', kind: 'play' } ]   // buttons in the case file
 }
@@ -69,9 +68,15 @@ Each entry in `cards` looks like this (see the comment at the top of the file fo
 - **Fill in a placeholder:** replace the `TODO` text. A link with `url: 'TODO'` shows as a dashed,
   non-clickable chip until you give it a real address.
 - **Resume:** replace `assets/resume.pdf` (it is currently a one-page placeholder).
-- **Add a project:** copy a card, give it a new `id`, pick a position, then add `connections`
-  entries so strings reach it and list it in the `related` of the cards it connects to.
+- **Add a project:** copy a card, give it a new `id`, pick a position, add its `id` to `tour`
+  (see below), and add `connections` entries so strings reach it.
+- **Order of PREVIOUS / NEXT FILE:** the `tour` list near the top, e.g.
+  `tour: ['profile', 'tech', 'vault', ...]`. It is a straight line through every card, so the first
+  file has no previous and the last has no next. The list view uses the same order.
 - **Strings:** `connections: [{ from: 'profile', to: 'tech' }, ...]`.
+- **Wall decoration:** `atmosphere.backdrop` holds the hanging banners and faded papers at the
+  sides (the concrete panels are drawn behind them). Move or remove entries, or delete `backdrop`
+  for a plain wall. It is not drawn on phone-width screens.
 - **Zoom levels, sun circle and petals:** `zoomLevels` and `atmosphere` near the top
   (set `atmosphere.petals.count` to `0` to turn the petals off).
 
@@ -95,7 +100,7 @@ Link previews need a picture at an **absolute** URL. Add an image (about 1200x63
 | Click or Enter on a card | fly to it and open its case file |
 | Touch: tap a card | fly to it; tap again or press **OPEN FILE** to open the case file |
 | Drag a card (mouse or pen) | move it; strings follow (positions reset on reload) |
-| Arrow left / right in a case file | previous / next connected file |
+| Arrow left / right in a case file | previous / next file, in `tour` order |
 | Esc | close the case file, or skip the intro |
 | Tab | moves through the controls and then the cards; focusing a card pans to it |
 
@@ -115,10 +120,15 @@ the whole board.
 ## Performance notes
 
 Pan and zoom only change one `transform` on the board. Things that were measured and kept cheap:
-card shadows are plain `box-shadow` (not `filter: drop-shadow`), the red string glow is stacked
-strokes (not an SVG blur filter), and the string animation, petals and effects pause when the tab is
-hidden, the camera is moving, or a case file is open. The only SVG filters left are three tiny
-noise textures used as repeating card backgrounds.
+
+- card shadows are plain `box-shadow` (not `filter: drop-shadow`);
+- the red string glow is stacked strokes (not an SVG blur filter);
+- the wall decoration costs a few milliseconds per pan frame in a software-rendered test, so its
+  concrete tile is a generated bitmap and it is skipped on phones;
+- string sway, petals and the other effects pause when the tab is hidden, the camera is moving, or a
+  case file is open.
+
+The only SVG filters left are three tiny noise textures used as repeating card backgrounds.
 
 ## Files
 

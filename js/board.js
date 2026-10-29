@@ -282,6 +282,74 @@
 
   // ---- init -----------------------------------------------------------
 
+  // One 600 x 400 tile of concrete formwork (panel seams and tie-holes), drawn once into a
+  // canvas and used as a plain bitmap. An SVG image here was re-rastered as vectors for every
+  // tile while panning, which was the single biggest cost of the backdrop. Drawn at 2x so
+  // the seams stay crisp.
+  function wallTile() {
+    var c = document.createElement('canvas');
+    c.width = 1200;
+    c.height = 800;
+    var g = c.getContext('2d');
+    if (!g) return '';
+    g.scale(2, 2);
+    g.fillStyle = 'rgba(0,0,0,0.4)';
+    g.fillRect(596, 0, 4, 400);
+    g.fillStyle = 'rgba(255,255,255,0.03)';
+    g.fillRect(593, 0, 3, 400);
+    g.fillStyle = 'rgba(0,0,0,0.34)';
+    g.fillRect(0, 396, 600, 4);
+    g.fillStyle = 'rgba(255,255,255,0.025)';
+    g.fillRect(0, 393, 600, 3);
+    [[110, 100], [490, 100], [110, 300], [490, 300]].forEach(function (p) {
+      g.fillStyle = 'rgba(0,0,0,0.5)';
+      g.beginPath();
+      g.arc(p[0], p[1], 7, 0, Math.PI * 2);
+      g.fill();
+      g.strokeStyle = 'rgba(255,255,255,0.04)';
+      g.lineWidth = 2;
+      g.beginPath();
+      g.arc(p[0], p[1], 9, 0, Math.PI * 2);
+      g.stroke();
+    });
+    return c.toDataURL('image/png');
+  }
+
+  // backdrop (wall panels, banners, faded papers): decoration behind everything
+  var bd = data.atmosphere && data.atmosphere.backdrop;
+  if (bd) {
+    var layer = el('div', 'backdrop');
+    layer.setAttribute('aria-hidden', 'true');
+    var place = function (node, x0, y0, w0, h0) {
+      node.style.left = x0 + 'px';
+      node.style.top = y0 + 'px';
+      node.style.width = w0 + 'px';
+      node.style.height = h0 + 'px';
+      return node;
+    };
+    var wall = place(el('div', 'backdrop__wall'), 0, 0, W, H);   // panels only behind the board itself (cheaper)
+    wall.style.backgroundImage = 'url(' + wallTile() + ')';
+    layer.appendChild(wall);
+    (bd.banners || []).forEach(function (b) {
+      var banner = place(el('div', 'bd-banner'), b.x - b.w / 2, b.y, b.w, b.h);
+      banner.appendChild(el('span', 'bd-banner__rod'));
+      var cloth = el('span', 'bd-banner__cloth');
+      var label = el('span', 'bd-banner__text', b.text);
+      label.lang = 'ja';
+      label.style.fontSize = Math.round(b.w * 0.4) + 'px';
+      cloth.appendChild(label);
+      banner.appendChild(cloth);
+      layer.appendChild(banner);
+    });
+    (bd.sheets || []).forEach(function (sh) {
+      var sheet = place(el('div', 'bd-sheet'), sh.x - sh.w / 2, sh.y - sh.h / 2, sh.w, sh.h);
+      sheet.style.setProperty('--rot', sh.rot + 'deg');
+      sheet.appendChild(el('span', 'bd-sheet__pin'));
+      layer.appendChild(sheet);
+    });
+    world.insertBefore(layer, world.firstChild);
+  }
+
   // dim rising-sun circle behind the board center (under the strings)
   var sunCfg = data.atmosphere && data.atmosphere.sun;
   if (sunCfg) {

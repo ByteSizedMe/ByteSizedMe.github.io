@@ -45,8 +45,14 @@
     head.appendChild(el('p', 'list-view__tagline', data.site.tagline));
     root.appendChild(head);
 
+    // same order as PREVIOUS / NEXT in the case file (data.tour)
+    var order = (data.tour || []).map(function (id) {
+      return data.cards.filter(function (c) { return c.id === id; })[0];
+    }).filter(Boolean);
+    data.cards.forEach(function (c) { if (order.indexOf(c) < 0) order.push(c); });
+
     var ul = el('ul', 'list-view__items');
-    data.cards.forEach(function (c) {
+    order.forEach(function (c) {
       var li = el('li', 'list-view__li');
       var btn = el('button', 'list-item list-item--' + c.type + (c.variant ? ' list-item--' + c.variant : ''));
       btn.type = 'button';

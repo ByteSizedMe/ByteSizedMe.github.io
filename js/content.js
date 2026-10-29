@@ -20,6 +20,13 @@ window.CASE = {
   },
 
   /*
+   * The tour: the order of PREVIOUS FILE / NEXT FILE in the case file, and of the list view.
+   * Every card should appear once. It is linear (no looping): the first file has no previous,
+   * the last has no next. Any card left out is added at the end.
+   */
+  tour: ['profile', 'tech', 'vault', 'phishguard', 'sentinel', 'japanese', 'contact'],
+
+  /*
    * Semantic zoom. The board gets data-zoom-level="far|mid|near" from the camera
    * scale (1 = one world unit per screen pixel):
    *   far  below `mid`           title + icon only
@@ -36,12 +43,47 @@ window.CASE = {
    */
   atmosphere: {
     sun: { x: 1500, y: 1000, r: 560 },   // world units
-    petals: { count: 10 }
+    petals: { count: 10 },
+
+    /*
+     * Backdrop: decoration behind everything so the sides of the wall are not bare (a panelled
+     * concrete wall is drawn behind these).
+     * All of it is purely visual (no text that says anything about you). Coordinates
+     * are world units and may lie outside the 3000 x 2000 board, for wide screens.
+     *   banners: hanging cloth banners { x (centre), y (top), w, h, text } with vertical text
+     *   sheets:  faded, redacted papers pinned to the wall { x, y (centre), w, h, rot }
+     * The concrete panels cover the board itself; banners and papers may sit outside it. None of
+     * it is drawn on phone-width screens (css). Remove `backdrop` entirely to get a plain wall.
+     */
+    backdrop: {
+      banners: [
+        { x: 105, y: -40, w: 170, h: 1560, text: '調査中' },
+        { x: 2975, y: -40, w: 170, h: 1560, text: '機密事項' },
+        { x: -215, y: -40, w: 170, h: 1560, text: '事件' },
+        { x: 3295, y: -40, w: 170, h: 1560, text: '捜査中' }
+      ],
+      sheets: [
+        { x: 830, y: 150, w: 190, h: 230, rot: 3 },
+        { x: 380, y: 760, w: 210, h: 280, rot: -5 },
+        { x: 335, y: 1130, w: 200, h: 270, rot: 4 },
+        { x: 400, y: 1490, w: 190, h: 250, rot: -3 },
+        { x: 2350, y: 150, w: 200, h: 240, rot: -3 },
+        { x: 2765, y: 360, w: 200, h: 260, rot: 4 },
+        { x: 2800, y: 1240, w: 190, h: 250, rot: -4 },
+        { x: 2745, y: 1590, w: 180, h: 240, rot: 3 },
+        { x: -55, y: 500, w: 210, h: 280, rot: 4 },
+        { x: -95, y: 1320, w: 200, h: 270, rot: -4 },
+        { x: 3090, y: 700, w: 210, h: 280, rot: -4 },
+        { x: 3130, y: 1450, w: 200, h: 270, rot: 4 },
+        { x: 1150, y: -170, w: 220, h: 200, rot: -3 },
+        { x: 2050, y: 2160, w: 210, h: 190, rot: -3 }
+      ]
+    }
   },
 
   // Free-floating stamps on the wall itself. at = world coordinates (center).
   boardStamps: [
-    { text: 'CASE FILE No. 001', tone: 'red', rot: -6, at: [420, 240], size: 'lg' },
+    { text: 'CASE FILE No. 001', tone: 'red', rot: -6, at: [500, 235], size: 'lg' },
     { text: '機密', tone: 'red', rot: 7, at: [1500, 410], size: 'xl', lang: 'ja' },
     { text: '事件ファイル', tone: 'yellow', rot: -5, at: [2700, 1850], size: 'lg', lang: 'ja' }
   ],
@@ -74,7 +116,6 @@ window.CASE = {
    *   vertical:  optional Japanese label set vertically along the card's right edge
    *   washi:     true | 'strong': washi-paper fibre texture on top of the card paper
    *   zoomFocus: scale the camera flies to for this card
-   *   related:   ids for next/previous navigation along strings (dossier view)
    *   detail:    { sections: [...] } for the dossier view. Each section has a
    *              `heading` and any of: text (string), list ([string]),
    *              rows ([[label, value]])
@@ -101,7 +142,6 @@ window.CASE = {
       stamps: [{ text: 'CLASSIFIED', tone: 'red', rot: -12, at: [0.7, 0.92] }],
       hanko: { text: '承', size: 70, rot: -8, at: [0.17, 0.92] },
       zoomFocus: 1.2,
-      related: ['tech', 'japanese'],
       detail: {
         sections: [
           {
@@ -149,7 +189,6 @@ window.CASE = {
       stamps: [],
       vertical: '技術',
       zoomFocus: 1.5,
-      related: ['profile', 'vault', 'phishguard', 'sentinel'],
       detail: {
         sections: [
           { heading: 'LANGUAGES', list: ['TODO: add languages'] },
@@ -179,7 +218,6 @@ window.CASE = {
       stamps: [{ text: 'DECLASSIFIED', tone: 'red', rot: 6, at: [0.47, 0.3], size: 'sm' }],
       vertical: '公開済み',
       zoomFocus: 1.4,
-      related: ['tech', 'sentinel'],
       detail: {
         sections: [
           { heading: 'OVERVIEW', text: 'Android security app, published on Google Play. Built under Rift Labs.' },
@@ -210,7 +248,6 @@ window.CASE = {
       fixture: 'pin', pinColor: 'red', pin: { x: 0.5, y: 0.07 },
       stamps: [],
       zoomFocus: 1.6,
-      related: ['tech'],
       detail: {
         sections: [
           { heading: 'OVERVIEW', text: 'TODO: description.' },
@@ -243,7 +280,6 @@ window.CASE = {
       stamps: [{ text: 'CLASSIFIED: IN DEVELOPMENT', tone: 'red', rot: -8, at: [0.5, 0.86] }],
       vertical: '開発中',
       zoomFocus: 1.4,
-      related: ['vault', 'tech'],
       detail: {
         sections: [
           { heading: 'OVERVIEW', text: 'Go RBAC authorization microservice. Pending / upcoming, planned for Jan 2027.' },
@@ -282,7 +318,6 @@ window.CASE = {
       vertical: '日本語学習',
       washi: 'strong',
       zoomFocus: 1.4,
-      related: ['profile', 'contact'],
       detail: {
         sections: [
           {
@@ -317,7 +352,6 @@ window.CASE = {
       vertical: '連絡先',
       washi: true,
       zoomFocus: 1.5,
-      related: ['japanese'],
       detail: {
         sections: [
           {

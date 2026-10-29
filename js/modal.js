@@ -6,7 +6,7 @@
  *   2. camera flies to the card (its zoomFocus)
  *   3. the card lifts, flips edge-on, and the dark dossier flips in from it
  * Close reverses it all and the camera returns to the view it had before.
- * Prev / next file fly the camera along the string to a connected card.
+ * Prev / next file step through the tour (data.tour in js/content.js), one file at a time.
  * Focusing a card with the keyboard pans the camera to it.
  *
  * Touch: the first tap on a card flies to it and shows an OPEN FILE button; a second
@@ -32,7 +32,6 @@
     var state = STATE.CLOSED;
     var current = null;        // id of the card whose dossier is showing
     var returnView = null;     // camera view before the first open
-    var trail = [];            // ids visited by next/prev, for stepping back
     var wantClose = false;     // close was asked for mid-transition
     var suppressFocusPan = false;
     var cardAnims = [];        // flip animations held on the current card
@@ -58,6 +57,10 @@
       for (var i = 0; i < data.cards.length; i++) if (data.cards[i].id === id) return data.cards[i];
       return null;
     }
+
+    // The tour: every card once, in the order previous / next walks through them.
+    var tour = (data.tour || []).filter(function (id) { return byId(id); });
+    data.cards.forEach(function (c) { if (tour.indexOf(c.id) < 0) tour.push(c.id); });
 
     function cardEl(id) { return world.querySelector('.card[data-id="' + id + '"]'); }
     function pad(n) { return n < 10 ? '0' + n : '' + n; }
@@ -244,25 +247,19 @@
       return wrap;
     }
 
-    // Previous = back along the trail (else the last connected file); next = the
-    // connected file after the one we came from. Both are named on the buttons.
+    // Linear: previous and next are simply the neighbours in the tour. The first file has
+    // no previous and the last has no next, so it never loops. Both are named on the buttons.
     function navTargets(c) {
-      var rel = c.related || [];
-      var back = trail.length ? trail[trail.length - 1] : null;
-      var prev = back || (rel.length ? rel[rel.length - 1] : null);
-      var i = back ? rel.indexOf(back) : -1;
-      var next = rel.length ? rel[(i + 1) % rel.length] : null;
-      if (next === prev) next = null;
-      return { prev: prev, next: next, prevIsBack: !!back };
+      var i = tour.indexOf(c.id);
+      return { prev: i > 0 ? tour[i - 1] : null, next: i < tour.length - 1 ? tour[i + 1] : null };
     }
 
-    function navButton(dir, id, back) {
+    function navButton(dir, id) {
       var target = byId(id);
       var b = el('button', 'dossier__navbtn dossier__navbtn--' + dir);
       b.type = 'button';
       b.dataset.go = id;
       b.dataset.dir = dir;
-      if (back) b.dataset.back = '1';
       var cap = dir === 'prev' ? 'PREVIOUS FILE' : 'NEXT FILE';
       var capEl = el('span', 'dossier__navcap');
       // the arrow glyphs are decoration: keep them out of the accessible name
@@ -275,8 +272,8 @@
     }
 
     function render(c) {
-      var n = data.cards.length;
-      var index = data.cards.indexOf(c) + 1;
+      var n = tour.length;
+      var index = tour.indexOf(c.id) + 1;
       tab.textContent = 'FILE ' + pad(index) + ' / ' + pad(n);
       labelEl.textContent = data.site.caseNo + ' · ' + c.label;
       titleEl.textContent = c.title;
@@ -302,8 +299,8 @@
 
       navEl.textContent = '';
       var t = navTargets(c);
-      if (t.prev) navEl.appendChild(navButton('prev', t.prev, t.prevIsBack));
-      if (t.next) navEl.appendChild(navButton('next', t.next, false));
+      if (t.prev) navEl.appendChild(navButton('prev', t.prev));
+      if (t.next) navEl.appendChild(navButton('next', t.next));
       navEl.hidden = !navEl.firstChild;
     }
 
@@ -409,7 +406,6 @@
       mode = 'board';
       state = STATE.FLYING;
       current = id;
-      trail = [];
       wantClose = false;
       returnView = preSelectView || Camera.getView();   // after a touch select, the camera is already on the card
       preSelectView = null;
@@ -472,7 +468,6 @@
       if (state !== STATE.CLOSED || !c) return;
       mode = 'list';
       current = id;
-      trail = [];
       wantClose = false;
       state = STATE.REVEALING;
       render(c);
@@ -505,15 +500,13 @@
         if (item) item.focus();
         state = STATE.CLOSED;
         current = null;
-        trail = [];
         mode = 'board';
       });
     }
 
-    function navigateList(toId, back) {
+    function navigateList(toId) {
       state = STATE.NAVIGATING;
       wantClose = false;
-      if (back) trail.pop(); else trail.push(current);
       var out = play(panel, [{ opacity: 1 }, { opacity: 0 }], { duration: 140, fill: 'forwards' });
       finished(out).then(function () {
         cancel(out);
@@ -576,20 +569,19 @@
       }).then(function () {
         state = STATE.CLOSED;
         current = null;
-        trail = [];
       });
     }
 
-    // Fly the camera along the string to a connected card, then open its file.
-    function navigate(toId, back) {
+    // Fly the camera to the next / previous file in the tour, then open it. (When the two
+    // cards happen to be joined by a string the flight follows its sag.)
+    function navigate(toId) {
       if (state !== STATE.OPEN || !byId(toId)) return;
-      if (mode === 'list') { navigateList(toId, back); return; }
+      if (mode === 'list') { navigateList(toId); return; }
       state = STATE.NAVIGATING;
       wantClose = false;
       var fromId = current;
       var card = cardEl(fromId);
       var c = byId(fromId);
-      if (back) trail.pop(); else trail.push(fromId);
 
       var fade = play(backdrop, [{ opacity: 1 }, { opacity: 0 }], { duration: 240, fill: 'forwards' });
       foldBack(card, c, true).then(function () {
@@ -643,7 +635,7 @@
 
     navEl.addEventListener('click', function (e) {
       var b = e.target.closest('button[data-go]');
-      if (b) navigate(b.dataset.go, !!b.dataset.back);
+      if (b) navigate(b.dataset.go);
     });
 
     function focusables() {
@@ -685,7 +677,7 @@
 
       if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
         var btn = navEl.querySelector(e.key === 'ArrowLeft' ? '[data-dir="prev"]' : '[data-dir="next"]');
-        if (btn) { e.preventDefault(); navigate(btn.dataset.go, !!btn.dataset.back); }
+        if (btn) { e.preventDefault(); navigate(btn.dataset.go); }
       }
     });
 
