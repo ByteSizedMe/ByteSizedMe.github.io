@@ -9,6 +9,10 @@
  * Prev / next file fly the camera along the string to a connected card.
  * Focusing a card with the keyboard pans the camera to it.
  *
+ * Touch: the first tap on a card flies to it and shows an OPEN FILE button; a second
+ * tap on the same card, or that button, opens the dossier. List view (js/list.js)
+ * opens the same dossier with no camera or card flip (Dossier.open(id, { list: true })).
+ *
  * Camera moves come from js/camera.js. While the dossier is open, <body> has
  * .dossier-open, which locks camera input.
  */
@@ -33,6 +37,13 @@
     var suppressFocusPan = false;
     var cardAnims = [];        // flip animations held on the current card
     var inertNodes = [];
+    var mode = 'board';        // 'board' (camera + card flip) or 'list' (plain fade)
+    var selectedId = null;     // touch: the card that has been tapped once
+    var preSelectView = null;  // the camera view before that first tap: where closing returns to
+    var pressView = null;      // the view at the last pointerdown, before camera.js reacts to the press
+    var selectionSettled = false;  // the fly-in finished: any camera move after that is the user's
+    var lastPointer = 'mouse';
+    var viewport = document.getElementById('viewport');
 
     // ---- small helpers --------------------------------------------------
 
@@ -143,7 +154,7 @@
     closeBtn.setAttribute('aria-label', 'Close case file');
     closeBtn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 5l14 14M19 5L5 19"/></svg>';
 
-    var head = el('header', 'dossier__head');
+    var head = el('div', 'dossier__head');
     var labelEl = el('p', 'dossier__label');
     var titleEl = el('h2', 'dossier__title');
     titleEl.id = 'dossier-title';
@@ -162,7 +173,7 @@
     bodyEl.setAttribute('role', 'region');
     bodyEl.setAttribute('aria-label', 'File contents');
 
-    var foot = el('footer', 'dossier__foot');
+    var foot = el('div', 'dossier__foot');
     var linksEl = el('div', 'dossier__links');
     var navEl = el('nav', 'dossier__nav');
     navEl.setAttribute('aria-label', 'Connected files');
@@ -253,8 +264,12 @@
       b.dataset.dir = dir;
       if (back) b.dataset.back = '1';
       var cap = dir === 'prev' ? 'PREVIOUS FILE' : 'NEXT FILE';
-      b.setAttribute('aria-label', cap.charAt(0) + cap.slice(1).toLowerCase() + ': ' + target.title);
-      b.appendChild(el('span', 'dossier__navcap', (dir === 'prev' ? '< ' : '') + cap + (dir === 'next' ? ' >' : '')));
+      var capEl = el('span', 'dossier__navcap');
+      // the arrow glyphs are decoration: keep them out of the accessible name
+      if (dir === 'prev') capEl.appendChild(el('span', null, '< ')).setAttribute('aria-hidden', 'true');
+      capEl.appendChild(document.createTextNode(cap));
+      if (dir === 'next') capEl.appendChild(el('span', null, ' >')).setAttribute('aria-hidden', 'true');
+      b.appendChild(capEl);
       b.appendChild(el('span', 'dossier__navtitle', target.title));
       return b;
     }
@@ -330,7 +345,8 @@
 
     function setInert(on) {
       if (on) {
-        inertNodes = ['viewport', 'hud', 'minimap'].map(function (id) { return document.getElementById(id); })
+        inertNodes = ['viewport', 'hud', 'minimap', 'list-view', 'view-switch', 'open-btn']
+          .map(function (id) { return document.getElementById(id); })
           .concat(Array.prototype.slice.call(document.querySelectorAll('h1.sr-only')))
           .filter(Boolean);
         inertNodes.forEach(function (n) { n.inert = true; });
@@ -385,11 +401,18 @@
 
     function open(id) {
       if (state !== STATE.CLOSED || !cardEl(id) || document.body.classList.contains('intro-running')) return;
+      var wasSelected = selectedId !== null;
+      selectedId = null;
+      selectionSettled = false;
+      openBtn.hidden = true;
+      if (!wasSelected) preSelectView = null;
+      mode = 'board';
       state = STATE.FLYING;
       current = id;
       trail = [];
       wantClose = false;
-      returnView = Camera.getView();
+      returnView = preSelectView || Camera.getView();   // after a touch select, the camera is already on the card
+      preSelectView = null;
       setHighlight(id);
       Camera.flyTo(id).then(function (arrived) {
         if (state !== STATE.FLYING) return;
@@ -400,6 +423,108 @@
           return;
         }
         return reveal(id, false);
+      });
+    }
+
+    // ---- touch: tap once to fly there, tap again (or OPEN FILE) to open -----
+
+    var openBtn = el('button', 'open-btn');
+    openBtn.id = 'open-btn';
+    openBtn.type = 'button';
+    openBtn.hidden = true;
+    (document.getElementById('hud') || document.body).appendChild(openBtn);   // inside the HUD landmark
+
+    function clearSelection() {
+      if (!selectedId) return;
+      selectedId = null;
+      preSelectView = null;
+      selectionSettled = false;
+      openBtn.hidden = true;
+      if (state === STATE.CLOSED) clearHighlight();
+    }
+
+    function select(id) {
+      if (state !== STATE.CLOSED || !cardEl(id) || document.body.classList.contains('intro-running')) return;
+      var before = selectedId ? preSelectView : (pressView || Camera.getView());   // keep the first view when re-selecting
+      clearSelection();
+      selectedId = id;
+      selectionSettled = false;
+      preSelectView = before;
+      var c = byId(id);
+      setHighlight(id);
+      openBtn.textContent = '';
+      openBtn.appendChild(el('span', 'open-btn__cap', 'OPEN FILE'));
+      openBtn.appendChild(el('span', 'open-btn__title', c.title));
+      openBtn.hidden = false;
+      Camera.flyTo(id).then(function (arrived) {
+        if (selectedId !== id) return;            // another card was chosen meanwhile
+        if (!arrived) clearSelection();           // the user grabbed the camera
+        else selectionSettled = true;
+      });
+    }
+
+    openBtn.addEventListener('click', function () { if (selectedId) open(selectedId); });
+
+    // ---- list view: the same dossier, no camera and no card flip -----------
+
+    function openList(id) {
+      var c = byId(id);
+      if (state !== STATE.CLOSED || !c) return;
+      mode = 'list';
+      current = id;
+      trail = [];
+      wantClose = false;
+      state = STATE.REVEALING;
+      render(c);
+      dossier.hidden = false;
+      panel.style.opacity = '';
+      document.body.classList.add('dossier-open');
+      setInert(true);
+      play(backdrop, [{ opacity: 0 }, { opacity: 1 }], { duration: 240, easing: 'ease-out' });
+      finished(play(panel, [{ opacity: 0, transform: 'translateY(18px) scale(0.98)' }, { opacity: 1, transform: 'none' }],
+        { duration: 280, easing: 'cubic-bezier(.2,.7,.2,1)' })).then(function () {
+        state = STATE.OPEN;
+        panel.focus({ preventScroll: true });
+        if (wantClose) { wantClose = false; close(); }
+      });
+    }
+
+    function closeList() {
+      state = STATE.CLOSING;
+      wantClose = false;
+      var fade = play(backdrop, [{ opacity: 1 }, { opacity: 0 }], { duration: 220, fill: 'forwards' });
+      var out = play(panel, [{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateY(12px) scale(0.98)' }],
+        { duration: 220, easing: 'ease-in', fill: 'forwards' });
+      Promise.all([finished(out), finished(fade)]).then(function () {
+        dossier.hidden = true;
+        cancel(out);
+        cancel(fade);
+        setInert(false);
+        document.body.classList.remove('dossier-open');
+        var item = document.querySelector('#list-view [data-id="' + current + '"]');
+        if (item) item.focus();
+        state = STATE.CLOSED;
+        current = null;
+        trail = [];
+        mode = 'board';
+      });
+    }
+
+    function navigateList(toId, back) {
+      state = STATE.NAVIGATING;
+      wantClose = false;
+      if (back) trail.pop(); else trail.push(current);
+      var out = play(panel, [{ opacity: 1 }, { opacity: 0 }], { duration: 140, fill: 'forwards' });
+      finished(out).then(function () {
+        cancel(out);
+        current = toId;
+        render(byId(toId));
+        return finished(play(panel, [{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }],
+          { duration: 200, easing: 'ease-out' }));
+      }).then(function () {
+        state = STATE.OPEN;
+        panel.focus({ preventScroll: true });
+        if (wantClose) { wantClose = false; close(); }
       });
     }
 
@@ -422,6 +547,11 @@
     }
 
     function close() {
+      if (mode === 'list') {
+        if (state === STATE.OPEN) closeList();
+        else if (state === STATE.REVEALING || state === STATE.NAVIGATING) wantClose = true;
+        return;
+      }
       if (state === STATE.FLYING) { cancelFlight(); return; }
       if (state !== STATE.OPEN) {
         if (state === STATE.REVEALING || state === STATE.NAVIGATING) wantClose = true;
@@ -453,6 +583,7 @@
     // Fly the camera along the string to a connected card, then open its file.
     function navigate(toId, back) {
       if (state !== STATE.OPEN || !byId(toId)) return;
+      if (mode === 'list') { navigateList(toId, back); return; }
       state = STATE.NAVIGATING;
       wantClose = false;
       var fromId = current;
@@ -476,10 +607,27 @@
 
     // ---- events ---------------------------------------------------------
 
+    world.addEventListener('pointerdown', function (e) {
+      lastPointer = e.pointerType;
+      pressView = Camera.getView();      // (capture phase: runs before camera.js clears its auto-view flag)
+    }, true);
+
+    // after the fly-in, any camera movement (pan, pinch, zoom) is the user moving on
+    Camera.onChange(function () { if (selectedId && selectionSettled) clearSelection(); });
+
     // Click (or Enter / Space) on a card. camera.js swallows the click after a pan.
+    // A touch tap needs two steps: tap to fly there, tap again (or OPEN FILE) to open.
     world.addEventListener('click', function (e) {
       var card = e.target.closest('.card');
-      if (card) open(card.dataset.id);
+      if (!card) return;
+      var id = card.dataset.id;
+      var tap = lastPointer === 'touch' && e.detail > 0;   // detail 0 = keyboard: open straight away
+      if (tap && selectedId !== id) select(id); else open(id);
+    });
+
+    // a tap on the bare wall drops the selection
+    viewport.addEventListener('click', function (e) {
+      if (selectedId && !e.target.closest('.card')) clearSelection();
     });
 
     // Focusing a card with the keyboard pans the camera to it.
@@ -506,7 +654,10 @@
     }
 
     document.addEventListener('keydown', function (e) {
-      if (state === STATE.CLOSED) return;
+      if (state === STATE.CLOSED) {
+        if (e.key === 'Escape' && selectedId) clearSelection();
+        return;
+      }
 
       if (e.key === 'Escape') {
         e.preventDefault();
@@ -537,6 +688,11 @@
         if (btn) { e.preventDefault(); navigate(btn.dataset.go, !!btn.dataset.back); }
       }
     });
+
+    window.Dossier = {
+      open: function (id, opts) { if (opts && opts.list) openList(id); else open(id); },
+      isOpen: function () { return state !== STATE.CLOSED; }
+    };
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
