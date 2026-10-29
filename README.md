@@ -21,6 +21,11 @@ python3 -m http.server 8000
 Repo Settings, Pages, deploy from branch `main` at `/ (root)`. All asset paths are
 relative, so it also works under a `/repo-name` subpath.
 
+## Controls
+
+Drag the wall to pan. Wheel / trackpad pinch / touch pinch zooms. Arrow keys pan,
+`+` / `-` zoom, `0` fits everything. HUD buttons and the minimap do the same.
+
 ## Status
 
-Batch 1 of 7 (scaffold, dark theme, static board). See `SPEC.md` for the plan.
+Batch 2 of 7 (camera: pan, zoom, HUD, minimap). See `SPEC.md` for the plan.
