@@ -142,5 +142,5 @@ js/camera.js      pan, zoom, fly-to, minimap, HUD
 js/modal.js       case file (dossier) view and touch select / open
 js/list.js        list view
 js/intro.js       intro sequence, stamps, spotlight, petals
-assets/           favicon.svg, resume.pdf (placeholder)
+assets/           favicon.svg (the site icon), icon-512.png and other PNG sizes, resume.pdf
 ```
