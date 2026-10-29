@@ -132,7 +132,7 @@ window.CASE = {
       title: 'Malhar Srivatsav',
       shortTitle: 'Malhar',       // far zoom, previous / next buttons, OPEN FILE
       subtitle: 'Software Engineer: Application Security & Mobile',
-      summary: 'BTech CS student at Manipal Institute of Technology Bangalore. Graduating May 2028.',
+      summary: 'BTech CS student at Manipal Institute of Technology, Bangalore. Into ethical hacking, pentesting, and application and mobile security. Aiming for a career in Japan at the intersection of software engineering and cybersecurity.',
       tags: ['APPSEC', 'MOBILE', 'CLASS OF 2028'],
       preview: [
         ['DEGREE', 'BTech CS'],
@@ -149,27 +149,51 @@ window.CASE = {
         sections: [
           {
             heading: 'SUMMARY',
-            text: 'Software Engineer: Application Security & Mobile. BTech CS student at Manipal Institute of Technology Bangalore, graduating May 2028. TODO: write a short personal summary.'
+            text: 'I’m Malhar, but everyone calls me Byte. I’m a third-year BTech Computer Science student at Manipal Institute of Technology, Bangalore, graduating in May 2028.'
+          },
+          {
+            heading: 'WHAT PULLS ME IN',
+            text: 'The offensive and defensive side of software: ethical hacking, pentesting, application security, and mobile security. I started out building apps, but I want to work in security rather than stay in general app development. I like understanding how systems break so I can build ones that don’t.'
+          },
+          {
+            heading: 'LONG-TERM GOAL',
+            text: 'To work in Japan as a software engineer specializing in cybersecurity. I’m building both the technical skills and the language to get there.'
           },
           {
             heading: 'EDUCATION',
             rows: [
               ['Institution', 'Manipal Institute of Technology Bangalore'],
-              ['Degree', 'BTech CS'],
-              ['Graduation', 'May 2028']
+              ['Degree', 'BTech in Computer Science'],
+              ['Graduation', 'May 2028'],
+              ['CGPA', '8.64 / 10']
             ]
           },
-          { heading: 'VENTURE', rows: [['Rift Labs', 'TODO: one-line description']] },
-          { heading: 'SKILLS OVERVIEW', text: 'TODO: short skills overview. The full list is in the Tech Stack file.' }
+          {
+            heading: 'EXPERIENCE',
+            rows: [
+              ['Clazuno', 'Software Engineering Intern (Remote), June 2026 to present'],
+              ['Rift Labs', 'Founding Engineer, Bangalore, 2025 to present']
+            ]
+          },
+          {
+            heading: 'ACHIEVEMENTS',
+            list: [
+              'Finalist, Hack IITK 2026: national cybersecurity hackathon hosted by IIT Kanpur’s C3i Hub',
+              'Solved 300+ data structures and algorithms problems on LeetCode',
+              'JLPT N2 certified (156/180)'
+            ]
+          },
+          { heading: 'SKILLS OVERVIEW', text: 'Python, Java, C, Kotlin, JavaScript and TypeScript; Android and React Native; Node.js and PostgreSQL; application and mobile security. The full list is in the Tech Stack file.' }
         ]
       },
       links: [
         {
           label: 'Download resume (PDF)',
           url: 'assets/resume.pdf',
-          kind: 'resume',
-          note: 'Placeholder file: replace assets/resume.pdf with your resume'
-        }
+          kind: 'resume'
+        },
+        { label: 'LinkedIn', url: 'https://www.linkedin.com/in/malhar-srivatsav/', kind: 'linkedin' },
+        { label: 'GitHub', url: 'https://github.com/ByteSizedMe', kind: 'github' }
       ]
     },
     {
@@ -179,13 +203,13 @@ window.CASE = {
       icon: 'chip',
       title: 'Tech Stack',
       summary: 'Grouped by language, mobile, security, backend and tools.',
-      tags: ['TODO: CONFIRM LIST'],
+      tags: ['KOTLIN', 'TYPESCRIPT', 'APPSEC'],
       preview: [
-        ['LANGUAGES', 'TODO'],
-        ['MOBILE', 'Android'],
-        ['SECURITY', 'Application security'],
-        ['BACKEND', 'Go (planned)'],
-        ['TOOLS', 'TODO']
+        ['LANGUAGES', 'Python, Java, C, Kotlin, JS, TS'],
+        ['MOBILE', 'Android, React Native'],
+        ['SECURITY', 'AES-256-GCM, Android Keystore'],
+        ['BACKEND', 'Node.js, PostgreSQL, Go (planned)'],
+        ['TOOLS', 'Git, GitHub, Linux']
       ],
       x: 820, y: 560, w: 440, h: 380, rot: 2.5,
       fixture: 'pin', pinColor: 'yellow', pin: { x: 0.5, y: 0.06 },
@@ -194,11 +218,12 @@ window.CASE = {
       zoomFocus: 1.5,
       detail: {
         sections: [
-          { heading: 'LANGUAGES', list: ['TODO: add languages'] },
-          { heading: 'MOBILE', list: ['Android (Singularity Vault)', 'TODO: confirm the rest'] },
-          { heading: 'SECURITY', list: ['Application security', 'RBAC authorization (Sentinel, planned)', 'TODO: confirm the rest'] },
-          { heading: 'BACKEND', list: ['Go (Sentinel, planned)', 'TODO: confirm the rest'] },
-          { heading: 'TOOLS', list: ['TODO: add tools'] }
+          { heading: 'LANGUAGES', list: ['Python', 'Java', 'C', 'SQL', 'Kotlin', 'JavaScript', 'TypeScript'] },
+          { heading: 'CORE CS', list: ['Data Structures & Algorithms', 'OOP', 'DBMS', 'Operating Systems', 'Computer Networks', 'Debugging', 'Testing'] },
+          { heading: 'MOBILE', list: ['Android (Jetpack Compose)', 'React Native (Expo)', 'React'] },
+          { heading: 'SECURITY', list: ['AES-256-GCM', 'PBKDF2WithHmacSHA256', 'Android Keystore', 'BiometricPrompt API', 'Session management', 'Web application security', 'RBAC authorization (Sentinel, planned)'] },
+          { heading: 'BACKEND, DATA & CLOUD', list: ['Node.js, Express', 'REST APIs', 'PostgreSQL', 'Firebase (Auth, Firestore)', 'AWS (basic)', 'Render', 'Go (Sentinel, planned)'] },
+          { heading: 'ENGINEERING PRACTICES', list: ['Git, GitHub', 'Code reviews', 'Build & deployment pipelines (EAS Build)', 'Android Studio', 'Linux'] }
         ]
       },
       links: []
@@ -223,15 +248,23 @@ window.CASE = {
       zoomFocus: 1.4,
       detail: {
         sections: [
-          { heading: 'OVERVIEW', text: 'Android security app, published on Google Play. Built under Rift Labs.' },
-          { heading: 'WHAT IT DOES', text: 'TODO: describe the app and its key features.' },
-          { heading: 'MY ROLE', text: 'TODO: what you built.' },
-          { heading: 'BUILT WITH', list: ['TODO: stack used'] }
+          { heading: 'OVERVIEW', text: 'A zero-knowledge, offline Android password manager, published on Google Play. Built under Rift Labs.' },
+          {
+            heading: 'SECURITY DESIGN',
+            list: [
+              'AES-256-GCM encryption with sub-2ms credential encrypt / decrypt latency',
+              'Deliberate brute-force resistance: 1.15s key derivation per unlock using PBKDF2WithHmacSHA256 (100,000 iterations), without hurting everyday UX',
+              '30-second idle timeout, 20-second clipboard auto-clear, and memory key wiping on backgrounding, with zero cloud dependency',
+              'Android BiometricPrompt layered over a master-password root of trust across 5 cryptographic operation types'
+            ]
+          },
+          { heading: 'MY ROLE', text: 'Founding Engineer at Rift Labs. I shipped it.' },
+          { heading: 'BUILT WITH', list: ['Android', 'Android (Jetpack Compose)', 'Android Keystore', 'BiometricPrompt API'] }
         ]
       },
       links: [
-        { label: 'Google Play', url: 'TODO', kind: 'play' },
-        { label: 'GitHub', url: 'TODO', kind: 'github' }
+        { label: 'Google Play', url: 'https://play.google.com/store/apps/details?id=com.riftlabs.singularityvault', kind: 'play' },
+        { label: 'GitHub', url: 'https://github.com/theriftlabs/SingularityVault', kind: 'github' }
       ]
     },
     {
@@ -240,12 +273,12 @@ window.CASE = {
       label: 'EXHIBIT B',
       icon: 'hook',
       title: 'PhishGuard',
-      summary: 'TODO: description.',
-      tags: ['TODO: TAGS'],
+      summary: 'Phishing detection REST API with 15+ URL risk signals and per-signal explainability.',
+      tags: ['TYPESCRIPT', 'NODE.JS', 'POSTGRESQL'],
       preview: [
-        ['WHAT', 'TODO'],
-        ['STACK', 'TODO'],
-        ['LINKS', 'TODO']
+        ['WHAT', 'Phishing detection REST API'],
+        ['SIGNALS', '15+ URL risk signals'],
+        ['STACK', 'TypeScript, Node.js, Express, PostgreSQL']
       ],
       x: 2700, y: 900, w: 340, h: 380, rot: 3.5,
       fixture: 'pin', pinColor: 'red', pin: { x: 0.5, y: 0.07 },
@@ -253,14 +286,19 @@ window.CASE = {
       zoomFocus: 1.6,
       detail: {
         sections: [
-          { heading: 'OVERVIEW', text: 'TODO: description.' },
-          { heading: 'MY ROLE', text: 'TODO: what you built.' },
-          { heading: 'BUILT WITH', list: ['TODO: stack used'] }
+          {
+            heading: 'OVERVIEW',
+            text: 'A phishing detection REST API with 15+ URL risk signals, including Shannon entropy analysis, Punycode homograph detection, Damerau-Levenshtein typosquatting detection, and double-encoding evasion checks. Integrated with Google Safe Browsing and URLhaus threat intelligence feeds.'
+          },
+          {
+            heading: 'RISK ENGINE',
+            text: 'A normalized risk scoring engine that returns per-signal explainability in structured JSON, backed by PostgreSQL scan history, API key authentication, and rate limiting. Deployed on Render.'
+          },
+          { heading: 'BUILT WITH', list: ['TypeScript', 'Node.js', 'Express', 'PostgreSQL', 'Google Safe Browsing', 'URLhaus', 'Render'] }
         ]
       },
       links: [
-        { label: 'GitHub', url: 'TODO', kind: 'github' },
-        { label: 'Project link', url: 'TODO', kind: 'link' }
+        { label: 'GitHub', url: 'https://github.com/ByteSizedMe/phishguard', kind: 'github' }
       ]
     },
     {
@@ -297,7 +335,9 @@ window.CASE = {
           { heading: 'SCOPE', text: 'TODO: planned features and design notes.' }
         ]
       },
-      links: []
+      links: [
+        { label: 'GitHub', url: 'https://github.com/ByteSizedMe/sentinel', kind: 'github' }
+      ]
     },
     {
       id: 'japanese',
@@ -307,11 +347,12 @@ window.CASE = {
       icon: 'torii',
       title: 'Japanese',
       subtitle: '日本語',
-      summary: 'Studying Japanese, aiming to work in Japan in software engineering and cybersecurity.',
-      tags: ['JLPT: TODO', 'GOAL: JAPAN'],
+      summary: 'JLPT N2 certified. Studying daily, aiming for N1 in July 2027. Goal: work in Japan’s tech industry.',
+      tags: ['JLPT N2', 'N1: JULY 2027', 'GOAL: JAPAN'],
       preview: [
-        ['JLPT', 'TODO (level / date)'],
-        ['PROGRESS', 'TODO'],
+        ['JLPT', 'N2 certified (156/180)'],
+        ['NEXT', 'N1, planned July 2027'],
+        ['HABIT', 'Studies every day'],
         ['GOAL', 'Work in Japan, combining software engineering and cybersecurity']
       ],
       x: 820, y: 1400, w: 420, h: 620, rot: 2,
@@ -326,12 +367,18 @@ window.CASE = {
           {
             heading: 'JLPT',
             rows: [
-              ['Level', 'TODO'],
-              ['Exam date', 'TODO']
+              ['Status', 'JLPT N2 (moved up from N3), scored 156/180'],
+              ['Next target', 'JLPT N1, planned for July 2027']
             ]
           },
-          { heading: 'STUDY PROGRESS', text: 'TODO: general study progress (resources, hours, what you can do so far).' },
-          { heading: 'GOAL', text: 'Work in Japan, combining software engineering and cybersecurity.' }
+          {
+            heading: 'HABIT',
+            text: 'Japanese is one of my two non-negotiable daily routines. I study every day, and I keep a themed vocabulary notebook focused on meaning and usage rather than rote memorization.'
+          },
+          {
+            heading: 'GOAL',
+            text: 'I’m interested in Japan’s tech industry and want to work there combining software engineering with cybersecurity. I’m building the language alongside my technical skills so both are ready at the same time.'
+          }
         ]
       },
       links: []
@@ -342,12 +389,12 @@ window.CASE = {
       label: 'CONTACT',
       icon: 'mail',
       title: 'Contact / Links',
-      summary: 'Where to find me. TODO: add the links.',
+      summary: 'Where to find me: GitHub, LinkedIn and email.',
       tags: ['GITHUB', 'LINKEDIN', 'EMAIL'],
       preview: [
-        ['GITHUB', 'TODO'],
-        ['LINKEDIN', 'TODO'],
-        ['EMAIL', 'TODO']
+        ['GITHUB', 'ByteSizedMe'],
+        ['LINKEDIN', 'malhar-srivatsav'],
+        ['EMAIL', 'malharsrivatsav2@gmail.com']
       ],
       x: 1450, y: 1700, w: 460, h: 300, rot: -2.5,
       fixture: 'pin', pinColor: 'yellow', pin: { x: 0.5, y: 0.07 },
@@ -360,17 +407,17 @@ window.CASE = {
           {
             heading: 'CHANNELS',
             rows: [
-              ['GitHub', 'TODO'],
-              ['LinkedIn', 'TODO'],
-              ['Email', 'TODO']
+              ['GitHub', 'github.com/ByteSizedMe'],
+              ['LinkedIn', 'linkedin.com/in/malhar-srivatsav'],
+              ['Email', 'malharsrivatsav2@gmail.com']
             ]
           }
         ]
       },
       links: [
-        { label: 'GitHub', url: 'TODO', kind: 'github' },
-        { label: 'LinkedIn', url: 'TODO', kind: 'linkedin' },
-        { label: 'Email', url: 'TODO', kind: 'email' }
+        { label: 'GitHub', url: 'https://github.com/ByteSizedMe', kind: 'github' },
+        { label: 'LinkedIn', url: 'https://www.linkedin.com/in/malhar-srivatsav/', kind: 'linkedin' },
+        { label: 'Email', url: 'mailto:malharsrivatsav2@gmail.com', kind: 'email' }
       ]
     }
   ],
