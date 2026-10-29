@@ -67,7 +67,7 @@ Each entry in `cards` looks like this (see the comment at the top of the file fo
 
 - **Fill in a placeholder:** replace the `TODO` text. A link with `url: 'TODO'` shows as a dashed,
   non-clickable chip until you give it a real address.
-- **Resume:** replace `assets/resume.pdf` (it is currently a one-page placeholder).
+- **Resume:** replace `assets/resume.pdf` with a newer PDF when you have one.
 - **Add a project:** copy a card, give it a new `id`, pick a position, add its `id` to `tour`
   (see below), and add `connections` entries so strings reach it.
 - **Order of PREVIOUS / NEXT FILE:** the `tour` list near the top, e.g.
