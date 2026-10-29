@@ -1,14 +1,13 @@
 # ByteSizedMe.github.io
 
-An investigation-board portfolio. Vanilla HTML/CSS/JS, no build step, no dependencies.
+An investigation-board portfolio: a dark "case wall" of pinned cards joined by red strings.
+Vanilla HTML, CSS and JavaScript. No framework, no build step, no dependencies.
 
-## Editing content
+- Pan and zoom the board, click a card to open its case file, drag cards around.
+- A plain **LIST VIEW** (top-right switch) shows the same cards as a simple vertical stack.
+- Works on phones (touch pan and pinch), with keyboard only, and with reduced motion.
 
-Everything lives in `js/content.js`: cards, positions, strings (`connections`) and
-board stamps. To add a card, copy an entry in `cards`, give it a new `id`, and add
-`connections` entries to wire it up. Values marked `TODO` are placeholders to fill in.
-
-## Run locally
+## Run it locally
 
 Open `index.html` in a browser, or serve the folder:
 
@@ -16,47 +15,121 @@ Open `index.html` in a browser, or serve the folder:
 python3 -m http.server 8000
 ```
 
-## Deploy on GitHub Pages
+Then visit http://localhost:8000. Useful URL options:
 
-Repo Settings, Pages, deploy from branch `main` at `/ (root)`. All asset paths are
-relative, so it also works under a `/repo-name` subpath.
+| URL | Does |
+| --- | --- |
+| `?intro=1` | replay the intro |
+| `?intro=0` | skip the intro |
+| `?view=list` | open in list view (`?view=board` for the board) |
 
-## Card content and zoom levels
+## Put it on GitHub Pages
 
-Each card in `js/content.js` has a `summary`, `tags`, a near-zoom `preview`, dossier
-`detail` sections, `links`, `zoomFocus` and `related` ids. `TODO` marks anything still
-to fill in. The board shows cards at three zoom levels (`zoomLevels` in the same file):
-far = icon + title, mid = + tags and summary, near = + content preview.
+This repository is named `ByteSizedMe.github.io`, so GitHub serves it as your user site
+at **https://bytesizedme.github.io/** with no build step.
 
-## Case files
+1. Push your changes to the `main` branch.
+2. On GitHub open **Settings, then Pages**.
+3. Under **Build and deployment** choose **Deploy from a branch**, pick branch **`main`** and
+   folder **`/ (root)`**, and save.
+4. Wait a minute or two. The site appears at the address above (the Pages settings page shows it).
 
-Click (or Enter on) a card to open its dossier: the camera flies to it, strings light up,
-and the card flips into the case file. `detail.sections`, `links` and `related` in
-`js/content.js` fill it. Left / right arrows or the buttons move to a connected file;
-Esc, the X or the backdrop closes it and the camera returns.
+All asset paths are relative, so the same files also work under a `/repo-name` subpath
+(for a project site) or on a custom domain (Settings, Pages, Custom domain).
 
-## Moving things around
+## Edit the content
 
-Cards can be dragged with a mouse or pen (positions reset on reload) and the strings
-follow. Hovering a card lifts and tilts it, lights its strings and outlines the cards
-it connects to. Strings sway gently when the board is idle and twang when a card is
-dropped; both stop under `prefers-reduced-motion`, in a hidden tab, while the camera
-moves, and while a dossier is open.
+**Everything lives in `js/content.js`.** You should never need to touch another file to
+change what the site says. Anything you have not filled in yet is marked `TODO` and shows up
+in italics with a dashed outline, so it is easy to spot.
 
-## Intro and atmosphere
+### Change a card
 
-The intro plays once per session (never under reduced motion): it opens tight on the
-Subject File, the stamp slams, then the camera pulls back while the strings draw in and
-the cards drop. SKIP INTRO or Esc ends it. Add `?intro=1` to the URL to replay it,
-`?intro=0` to skip it. The Japan layer (sun circle, petals), hanko seals, vertical
-labels and washi texture are set per card in `js/content.js`; set
-`atmosphere.petals.count` to 0 to turn the petals off.
+Each entry in `cards` looks like this (see the comment at the top of the file for every field):
 
-## Controls
+```js
+{
+  id: 'vault',                  // unique name, used in connections and related
+  type: 'polaroid',             // dossier | index | polaroid | sticky | folder
+  label: 'EXHIBIT A',           // small line above the title
+  icon: 'shield',               // a key of `icons`
+  title: 'Singularity Vault',
+  summary: 'One line shown at mid zoom and read out by screen readers.',
+  tags: ['ANDROID', 'SECURITY'],            // chips at mid zoom
+  preview: [['PLATFORM', 'Android']],       // 3-5 rows shown at near zoom
+  x: 1950, y: 430, w: 400, h: 540, rot: -3, // centre position, size, tilt (world is 3000 x 2000)
+  fixture: 'tape', pin: { x: 0.5, y: 0.03 },// pin or tape, and where the string attaches
+  zoomFocus: 1.4,               // zoom used when the camera flies to it
+  related: ['tech', 'sentinel'],// ids for previous / next file in the case file
+  detail: { sections: [ { heading: 'OVERVIEW', text: '...' } ] },  // the case file
+  links: [ { label: 'Google Play', url: 'TODO', kind: 'play' } ]   // buttons in the case file
+}
+```
 
-Drag the wall to pan. Wheel / trackpad pinch / touch pinch zooms. Arrow keys pan,
-`+` / `-` zoom, `0` fits everything. HUD buttons and the minimap do the same.
+- **Fill in a placeholder:** replace the `TODO` text. A link with `url: 'TODO'` shows as a dashed,
+  non-clickable chip until you give it a real address.
+- **Resume:** replace `assets/resume.pdf` (it is currently a one-page placeholder).
+- **Add a project:** copy a card, give it a new `id`, pick a position, then add `connections`
+  entries so strings reach it and list it in the `related` of the cards it connects to.
+- **Strings:** `connections: [{ from: 'profile', to: 'tech' }, ...]`.
+- **Zoom levels, sun circle and petals:** `zoomLevels` and `atmosphere` near the top
+  (set `atmosphere.petals.count` to `0` to turn the petals off).
 
-## Status
+### Social preview image (optional)
 
-Batch 6 of 7 (intro and atmosphere). See `SPEC.md` for the plan.
+Link previews need a picture at an **absolute** URL. Add an image (about 1200x630) at
+`assets/og-image.png`, then add this to the `<head>` of `index.html` (there is a TODO there):
+
+```html
+<meta property="og:image" content="https://bytesizedme.github.io/assets/og-image.png">
+<meta name="twitter:image" content="https://bytesizedme.github.io/assets/og-image.png">
+```
+
+## Using the site
+
+| Input | Does |
+| --- | --- |
+| Drag the wall / one finger | pan |
+| Wheel, trackpad pinch, two fingers | zoom |
+| Arrow keys, `+` / `-`, `0` | pan, zoom, fit everything |
+| Click or Enter on a card | fly to it and open its case file |
+| Touch: tap a card | fly to it; tap again or press **OPEN FILE** to open the case file |
+| Drag a card (mouse or pen) | move it; strings follow (positions reset on reload) |
+| Arrow left / right in a case file | previous / next connected file |
+| Esc | close the case file, or skip the intro |
+| Tab | moves through the controls and then the cards; focusing a card pans to it |
+
+On a phone the board opens centred on the title card, fitted to the screen width. FIT ALL shows
+the whole board.
+
+## Accessibility
+
+- Every control is a real button or link with a visible focus ring; the case file is a dialog with a
+  focus trap and returns focus when closed.
+- Cards are named by their own visible text and described by their summary.
+- Text is checked against WCAG AA on the dark surfaces; automated checks (axe-core, Lighthouse)
+  report no accessibility issues.
+- `prefers-reduced-motion` turns off the intro, camera animation, inertia, tilt, string sway,
+  petals, spotlight and flip transitions. List view is the lightweight, no-effects alternative.
+
+## Performance notes
+
+Pan and zoom only change one `transform` on the board. Things that were measured and kept cheap:
+card shadows are plain `box-shadow` (not `filter: drop-shadow`), the red string glow is stacked
+strokes (not an SVG blur filter), and the string animation, petals and effects pause when the tab is
+hidden, the camera is moving, or a case file is open. The only SVG filters left are three tiny
+noise textures used as repeating card backgrounds.
+
+## Files
+
+```
+index.html        page shell, head metadata, controls
+css/style.css     all styling
+js/content.js     ALL content and layout (edit this)
+js/board.js       builds cards and strings, drag, hover, string motion, zoom levels
+js/camera.js      pan, zoom, fly-to, minimap, HUD
+js/modal.js       case file (dossier) view and touch select / open
+js/list.js        list view
+js/intro.js       intro sequence, stamps, spotlight, petals
+assets/           favicon.svg, resume.pdf (placeholder)
+```
