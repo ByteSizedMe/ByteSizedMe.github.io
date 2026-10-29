@@ -7,7 +7,7 @@
  *
  * Camera state is { x, y, k }: world origin position in screen px, and scale.
  * Public API: window.Camera = { flyTo, fitAll, reset, zoomBy, getState, getView,
- * flyToView, stop, syncCard, onChange }.
+ * flyToView, stop, syncCard, snapTo, snapFit, onChange }.
  * onChange(fn) calls fn(state) on every camera change; it can be called before init.
  */
 (function () {
@@ -191,7 +191,7 @@
     // arrival, false if something interrupted it.
     // `arc` (world units) bows the path downward at its midpoint, so a flight between
     // two cards can follow the sag of the string that joins them.
-    function animateTo(cx, cy, k, arc) {
+    function animateTo(cx, cy, k, arc, durationOverride) {
       var to = solve(cx, cy, k);
       var from = center();
       stopMotion();
@@ -205,7 +205,7 @@
         return Promise.resolve(true);
       }
 
-      var duration = durationFor(from, to);
+      var duration = durationOverride || durationFor(from, to);
       return new Promise(function (resolve) {
         var start = null;
         var lk0 = Math.log(from.k);
@@ -246,9 +246,10 @@
       return animateTo(card.x, card.y, k, opts && opts.arc);
     }
 
-    function fitAll() {
+    // opts.duration (ms) overrides the usual 600-900ms; only the intro pull-back uses it.
+    function fitAll(opts) {
       computeFit();   // cards may have been dragged since the last measure
-      return animateTo(fit.cx, fit.cy, fit.k).then(function (arrived) {
+      return animateTo(fit.cx, fit.cy, fit.k, 0, opts && opts.duration).then(function (arrived) {
         if (arrived) fitMode = true;
         return arrived;
       });
@@ -309,8 +310,12 @@
       startZoomLoop();
     }
 
-    // The dossier overlay owns the screen while it is open: no camera input.
-    function locked() { return document.body.classList.contains('dossier-open'); }
+    // The dossier overlay owns the screen while it is open, and the intro owns it while it
+    // plays: no camera input from the user in either case.
+    function locked() {
+      var c = document.body.classList;
+      return c.contains('dossier-open') || c.contains('intro-running');
+    }
 
     document.addEventListener('wheel', function (e) {
       if (locked()) {
@@ -372,6 +377,7 @@
     }, true);
 
     viewport.addEventListener('pointerdown', function (e) {
+      if (locked()) return;
       if (e.pointerType === 'mouse' && e.button !== 0) return;
       // a mouse or pen press on a card is for the card (board.js drags it);
       // touch can pan from anywhere, since cards cover most of the wall when zoomed in
@@ -640,6 +646,19 @@
     window.Camera.getView = getView;
     window.Camera.flyToView = flyToView;
     window.Camera.stop = stopMotion;
+
+    // Instant placement, for the intro's opening shot and for skipping it.
+    window.Camera.snapTo = function (cx, cy, k) {
+      stopMotion();
+      fitMode = false;
+      setViewFromCenter(cx, cy, k);
+    };
+    window.Camera.snapFit = function () {
+      stopMotion();
+      computeFit();
+      setViewFromCenter(fit.cx, fit.cy, fit.k);
+      fitMode = true;
+    };
     window.Camera.getState = function () { return { x: cam.x, y: cam.y, k: cam.k }; };
   }
 
