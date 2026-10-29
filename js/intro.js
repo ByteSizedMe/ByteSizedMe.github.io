@@ -203,13 +203,15 @@
 
       try { sessionStorage.setItem(SEEN_KEY, '1'); } catch (e) { /* storage blocked */ }
       body.classList.add('intro-running');
+      world.inert = true;      // nothing on the half-built board can take keyboard focus until it lands
 
       var skip = document.createElement('button');
       skip.type = 'button';
       skip.className = 'intro-skip';
       skip.textContent = 'SKIP INTRO';
       skip.setAttribute('aria-label', 'Skip the intro animation');
-      body.insertBefore(skip, body.firstChild);
+      var headEl = document.querySelector('.page-head');
+      (headEl || body).insertBefore(skip, (headEl || body).firstChild);   // first in tab order, inside the header landmark
 
       function end(skipped) {
         if (done) return;
@@ -218,9 +220,10 @@
         anims.forEach(function (a) { try { a.cancel(); } catch (e) { /* already gone */ } });
         if (skipped) {
           Camera.stop();
-          Camera.snapFit();
+          Camera.snapHome();
         }
         body.classList.remove('intro-running');
+        world.inert = false;
         document.removeEventListener('keydown', onKey);
         markStamped(hero.id);
         skip.classList.add('is-leaving');
@@ -270,9 +273,9 @@
         { transform: shakeAt(-4, 3) }, { transform: shakeAt(3, -2) }, { transform: shakeAt(0, 0) }
       ], { duration: 380, delay: T.slam + 250, easing: 'ease-out' });
 
-      // 2. the camera pulls back to the full board
+      // 2. the camera pulls back to the home view (the full board; on a phone, the title card at screen width)
       var cameraDone = new Promise(function (resolve) {
-        later(T.pull, function () { Camera.fitAll({ duration: T.pullMs }).then(resolve); });
+        later(T.pull, function () { Camera.goHome({ duration: T.pullMs }).then(resolve); });
       });
 
       // 3. the other cards drop in, one after another
@@ -314,6 +317,7 @@
       } catch (err) {
         html.classList.remove('intro-pending');
         body.classList.remove('intro-running');
+        world.inert = false;
         petals.start();
       }
     } else {

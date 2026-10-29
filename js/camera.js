@@ -6,8 +6,12 @@
  * strings follow for free and are never re-rendered while the camera moves.
  *
  * Camera state is { x, y, k }: world origin position in screen px, and scale.
- * Public API: window.Camera = { flyTo, fitAll, reset, zoomBy, getState, getView,
- * flyToView, stop, syncCard, snapTo, snapFit, onChange }.
+ * Public API: window.Camera = { flyTo, fitAll, goHome, reset, zoomBy, getState, getView,
+ * flyToView, stop, syncCard, snapTo, snapFit, snapHome, onChange }.
+ *
+ * Two "auto" views re-apply themselves when the window resizes: fit (everything in
+ * view) and home (the opening view: fit-all on desktop, the Subject File fitted to
+ * the screen width on a phone).
  * onChange(fn) calls fn(state) on every camera change; it can be called before init.
  */
 (function () {
@@ -53,7 +57,8 @@
     var vh = 0;
     var minK = MIN_K;
     var fit = { cx: W / 2, cy: H / 2, k: 0.5 };
-    var fitMode = true;   // true while the view is "fit all": resizes re-fit
+    var home = fit;
+    var autoMode = 'home';   // null | 'fit' | 'home': which auto view a resize re-applies
 
     // ---- math helpers -------------------------------------------------
 
@@ -100,11 +105,21 @@
       var k = Math.min(vw / (x1 - x0), vh / (y1 - y0));
       minK = Math.min(MIN_K, k);
       fit = { cx: (x0 + x1) / 2, cy: (y0 + y1) / 2, k: Math.min(MAX_K, k) };
+
+      // Phones start on the title card, fitted to the screen width. A whole-board
+      // overview would be ~15% there and unreadable (FIT ALL is still one tap away).
+      var hero = byId('profile');
+      if (vw < 768 && hero) {
+        var hk = Math.min((0.92 * vw) / hero.w, (0.9 * vh) / hero.h);
+        home = { cx: hero.x, cy: hero.y, k: Math.max(minK, Math.min(MAX_K, hk)) };
+      } else {
+        home = fit;
+      }
     }
 
     function measure() {
-      vw = viewport.clientWidth;
-      vh = viewport.clientHeight;
+      vw = viewport.clientWidth || window.innerWidth;     // the board is display:none in list view
+      vh = viewport.clientHeight || window.innerHeight;
       computeFit();
     }
 
@@ -169,7 +184,7 @@
     function stopMotion() { stopTween(); stopInertia(); stopZoom(); }
 
     // Any direct user input: take over from whatever the camera was doing.
-    function takeOver() { stopMotion(); fitMode = false; }
+    function takeOver() { stopMotion(); autoMode = null; }
 
     // Clamp a target and report the center that actually results.
     function solve(cx, cy, k) {
@@ -195,7 +210,7 @@
       var to = solve(cx, cy, k);
       var from = center();
       stopMotion();
-      fitMode = false;
+      autoMode = null;
 
       var tiny = Math.abs(to.cx - from.cx) < 0.5 && Math.abs(to.cy - from.cy) < 0.5 &&
         Math.abs(Math.log(to.k / from.k)) < 0.001;
@@ -250,24 +265,34 @@
     function fitAll(opts) {
       computeFit();   // cards may have been dragged since the last measure
       return animateTo(fit.cx, fit.cy, fit.k, 0, opts && opts.duration).then(function (arrived) {
-        if (arrived) fitMode = true;
+        if (arrived) autoMode = 'fit';
         return arrived;
       });
     }
 
-    // "Reset" is the home view: the Subject File centered at 100%.
+    function goHome(opts) {
+      computeFit();
+      return animateTo(home.cx, home.cy, home.k, 0, opts && opts.duration).then(function (arrived) {
+        if (arrived) autoMode = 'home';
+        return arrived;
+      });
+    }
+
+    // "Reset": the Subject File centered at 100% (on a phone: the home view).
     function reset() {
+      if (vw < 768) return goHome();       // at 100% the title card would not fit a phone
       return byId('profile') ? flyTo('profile', { k: 1 }) : fitAll();
     }
 
-    // A restorable view: center + scale, plus whether it was "fit all" (so it re-fits on resize).
+    // A restorable view: center + scale, plus which auto view it was (so it re-applies on resize).
     function getView() {
       var c = center();
-      return { cx: c.cx, cy: c.cy, k: c.k, fit: fitMode };
+      return { cx: c.cx, cy: c.cy, k: c.k, auto: autoMode };
     }
 
     function flyToView(v) {
-      if (v.fit) return fitAll();
+      if (v.auto === 'fit') return fitAll();
+      if (v.auto === 'home') return goHome();
       return animateTo(v.cx, v.cy, v.k);
     }
 
@@ -298,23 +323,28 @@
     function wheelZoom(e) {
       stopTween();
       stopInertia();
-      fitMode = false;
+      autoMode = null;
       var dy = e.deltaY;
       if (e.deltaMode === 1) dy *= 16;
       else if (e.deltaMode === 2) dy *= vh;
       dy = Math.max(-120, Math.min(120, dy));
       // ctrl+wheel is how browsers report a trackpad pinch: those deltas are small
       var factor = Math.exp(-dy * (e.ctrlKey ? 0.01 : 0.0015));
+      if (reduceMotion.matches) {          // no smoothing: zoom exactly as far as the wheel went
+        zoomAt(e.clientX, e.clientY, cam.k * factor);
+        return;
+      }
       var base = zoomGoal ? zoomGoal.k : cam.k;
       zoomGoal = { k: clampK(base * factor), px: e.clientX, py: e.clientY };
       startZoomLoop();
     }
 
-    // The dossier overlay owns the screen while it is open, and the intro owns it while it
-    // plays: no camera input from the user in either case.
+    // The dossier overlay owns the screen while it is open, the intro while it plays, and the
+    // list view while it is showing: no camera input from the user in any of those cases.
     function locked() {
       var c = document.body.classList;
-      return c.contains('dossier-open') || c.contains('intro-running');
+      return c.contains('dossier-open') || c.contains('intro-running') ||
+        document.documentElement.classList.contains('list-mode');
     }
 
     document.addEventListener('wheel', function (e) {
@@ -630,17 +660,19 @@
       var c = center();
       measure();
       stopTween();
-      if (fitMode) setViewFromCenter(fit.cx, fit.cy, fit.k);
+      if (autoMode === 'fit') setViewFromCenter(fit.cx, fit.cy, fit.k);
+      else if (autoMode === 'home') setViewFromCenter(home.cx, home.cy, home.k);
       else setViewFromCenter(c.cx, c.cy, c.k);
     });
 
-    // ---- start: fit all, no tween on first paint ----------------------
+    // ---- start: the home view, no tween on first paint ---------------
 
     measure();
-    setViewFromCenter(fit.cx, fit.cy, fit.k);
+    setViewFromCenter(home.cx, home.cy, home.k);
 
     window.Camera.flyTo = flyTo;
     window.Camera.fitAll = fitAll;
+    window.Camera.goHome = goHome;
     window.Camera.reset = reset;
     window.Camera.zoomBy = zoomBy;
     window.Camera.getView = getView;
@@ -650,14 +682,20 @@
     // Instant placement, for the intro's opening shot and for skipping it.
     window.Camera.snapTo = function (cx, cy, k) {
       stopMotion();
-      fitMode = false;
+      autoMode = null;
       setViewFromCenter(cx, cy, k);
     };
     window.Camera.snapFit = function () {
       stopMotion();
       computeFit();
       setViewFromCenter(fit.cx, fit.cy, fit.k);
-      fitMode = true;
+      autoMode = 'fit';
+    };
+    window.Camera.snapHome = function () {
+      stopMotion();
+      computeFit();
+      setViewFromCenter(home.cx, home.cy, home.k);
+      autoMode = 'home';
     };
     window.Camera.getState = function () { return { x: cam.x, y: cam.y, k: cam.k }; };
   }
