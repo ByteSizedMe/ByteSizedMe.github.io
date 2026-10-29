@@ -165,33 +165,29 @@ window.CASE = {
               ['Institution', 'Manipal Institute of Technology Bangalore'],
               ['Degree', 'BTech in Computer Science'],
               ['Graduation', 'May 2028'],
-              ['CGPA', '8.64 / 10']
+              ['CGPA', '8.64 out of 10']
             ]
           },
           {
             heading: 'EXPERIENCE',
             rows: [
-              ['Clazuno', 'Software Engineering Intern (Remote), June 2026 to present'],
-              ['Rift Labs', 'Founding Engineer, Bangalore, 2025 to present']
+              ['Clazuno', 'Remote software engineering intern since June 2026, building mobile and web features in React Native'],
+              ['Rift Labs', 'Founding engineer in Bangalore since 2025']
             ]
           },
           {
             heading: 'ACHIEVEMENTS',
             list: [
-              'Finalist, Hack IITK 2026: national cybersecurity hackathon hosted by IIT Kanpur’s C3i Hub',
-              'Solved 300+ data structures and algorithms problems on LeetCode',
-              'JLPT N2 certified (156/180)'
+              'Hack IITK 2026 finalist, a national cybersecurity hackathon run by IIT Kanpur’s C3i Hub',
+              'Over 300 data structures and algorithms problems solved on LeetCode',
+              'JLPT N2 certified, with a score of 156 out of 180'
             ]
           },
-          { heading: 'SKILLS OVERVIEW', text: 'Python, Java, C, Kotlin, JavaScript and TypeScript; Android and React Native; Node.js and PostgreSQL; application and mobile security. The full list is in the Tech Stack file.' }
+          { heading: 'SKILLS OVERVIEW', text: 'Comfortable in Python, Java, C, Kotlin, JavaScript and TypeScript. I build for Android and React Native, write backends in Node.js with PostgreSQL, and care most about application and mobile security. The full breakdown is in the Tech Stack file.' }
         ]
       },
       links: [
-        {
-          label: 'Download resume (PDF)',
-          url: 'assets/resume.pdf',
-          kind: 'resume'
-        },
+        { label: 'Preview resume', url: 'assets/resume.pdf', image: 'assets/resume-preview.png', kind: 'preview' },
         { label: 'LinkedIn', url: 'https://www.linkedin.com/in/malhar-srivatsav/', kind: 'linkedin' },
         { label: 'GitHub', url: 'https://github.com/ByteSizedMe', kind: 'github' }
       ]
@@ -219,11 +215,11 @@ window.CASE = {
       detail: {
         sections: [
           { heading: 'LANGUAGES', list: ['Python', 'Java', 'C', 'SQL', 'Kotlin', 'JavaScript', 'TypeScript'] },
-          { heading: 'CORE CS', list: ['Data Structures & Algorithms', 'OOP', 'DBMS', 'Operating Systems', 'Computer Networks', 'Debugging', 'Testing'] },
+          { heading: 'CS FUNDAMENTALS', list: ['Data structures and algorithms', 'Object-oriented design', 'Databases (DBMS)', 'Operating systems', 'Computer networks', 'Debugging', 'Testing'] },
           { heading: 'MOBILE', list: ['Android (Jetpack Compose)', 'React Native (Expo)', 'React'] },
-          { heading: 'SECURITY', list: ['AES-256-GCM', 'PBKDF2WithHmacSHA256', 'Android Keystore', 'BiometricPrompt API', 'Session management', 'Web application security', 'RBAC authorization (Sentinel, planned)'] },
-          { heading: 'BACKEND, DATA & CLOUD', list: ['Node.js, Express', 'REST APIs', 'PostgreSQL', 'Firebase (Auth, Firestore)', 'AWS (basic)', 'Render', 'Go (Sentinel, planned)'] },
-          { heading: 'ENGINEERING PRACTICES', list: ['Git, GitHub', 'Code reviews', 'Build & deployment pipelines (EAS Build)', 'Android Studio', 'Linux'] }
+          { heading: 'SECURITY', list: ['AES-256-GCM encryption', 'PBKDF2WithHmacSHA256 key derivation', 'Android Keystore', 'Biometric authentication (BiometricPrompt)', 'Session management', 'Web application security', 'RBAC authorization (Sentinel, planned)'] },
+          { heading: 'BACKEND & CLOUD', list: ['Node.js with Express', 'REST API design', 'PostgreSQL', 'Firebase Auth and Firestore', 'AWS (the basics)', 'Hosting on Render', 'Go (Sentinel, planned)'] },
+          { heading: 'HOW I WORK', list: ['Git and GitHub', 'Code reviews', 'Build and release pipelines (EAS Build)', 'Android Studio', 'Linux'] }
         ]
       },
       links: []
@@ -248,17 +244,17 @@ window.CASE = {
       zoomFocus: 1.4,
       detail: {
         sections: [
-          { heading: 'OVERVIEW', text: 'A zero-knowledge, offline Android password manager, published on Google Play. Built under Rift Labs.' },
+          { heading: 'OVERVIEW', text: 'A password manager for Android that works fully offline and never sends your data anywhere (zero-knowledge). Live on Google Play and built under Rift Labs.' },
           {
             heading: 'SECURITY DESIGN',
             list: [
-              'AES-256-GCM encryption with sub-2ms credential encrypt / decrypt latency',
-              'Deliberate brute-force resistance: 1.15s key derivation per unlock using PBKDF2WithHmacSHA256 (100,000 iterations), without hurting everyday UX',
-              '30-second idle timeout, 20-second clipboard auto-clear, and memory key wiping on backgrounding, with zero cloud dependency',
-              'Android BiometricPrompt layered over a master-password root of trust across 5 cryptographic operation types'
+              'Everything is encrypted with AES-256-GCM, and encrypting or decrypting a credential takes under 2 ms',
+              'Unlocking runs PBKDF2WithHmacSHA256 for 100,000 iterations (about 1.15 s). That cost is deliberate: it makes brute-forcing painful without making daily use feel slow',
+              'Secrets don’t linger: the app locks after 30 seconds idle, clears the clipboard after 20 seconds, and wipes keys from memory when it goes to the background. There is no cloud component at all',
+              'Biometric unlock (Android BiometricPrompt) sits on top of the master password, which stays the root of trust, across 5 types of cryptographic operation'
             ]
           },
-          { heading: 'MY ROLE', text: 'Founding Engineer at Rift Labs. I shipped it.' },
+          { heading: 'MY ROLE', text: 'I’m the founding engineer at Rift Labs and took this app all the way to release.' },
           { heading: 'BUILT WITH', list: ['Android', 'Android (Jetpack Compose)', 'Android Keystore', 'BiometricPrompt API'] }
         ]
       },
@@ -273,7 +269,7 @@ window.CASE = {
       label: 'EXHIBIT B',
       icon: 'hook',
       title: 'PhishGuard',
-      summary: 'Phishing detection REST API with 15+ URL risk signals and per-signal explainability.',
+      summary: 'A phishing-detection API that scores URLs on 15+ risk signals and explains each one.',
       tags: ['TYPESCRIPT', 'NODE.JS', 'POSTGRESQL'],
       preview: [
         ['WHAT', 'Phishing detection REST API'],
@@ -288,11 +284,11 @@ window.CASE = {
         sections: [
           {
             heading: 'OVERVIEW',
-            text: 'A phishing detection REST API with 15+ URL risk signals, including Shannon entropy analysis, Punycode homograph detection, Damerau-Levenshtein typosquatting detection, and double-encoding evasion checks. Integrated with Google Safe Browsing and URLhaus threat intelligence feeds.'
+            text: 'A REST API that checks a URL against more than 15 risk signals: Shannon entropy, Punycode homograph tricks, typosquatting (Damerau-Levenshtein distance) and double-encoding evasion, plus lookups against the Google Safe Browsing and URLhaus threat feeds.'
           },
           {
             heading: 'RISK ENGINE',
-            text: 'A normalized risk scoring engine that returns per-signal explainability in structured JSON, backed by PostgreSQL scan history, API key authentication, and rate limiting. Deployed on Render.'
+            text: 'The signals feed one normalized risk score, and the JSON response shows how much each signal contributed. Scan history is stored in PostgreSQL, API keys and rate limiting guard the endpoints, and the service is deployed on Render.'
           },
           { heading: 'BUILT WITH', list: ['TypeScript', 'Node.js', 'Express', 'PostgreSQL', 'Google Safe Browsing', 'URLhaus', 'Render'] }
         ]
@@ -367,7 +363,7 @@ window.CASE = {
           {
             heading: 'JLPT',
             rows: [
-              ['Status', 'JLPT N2 (moved up from N3), scored 156/180'],
+              ['Status', 'Passed JLPT N2 with 156 out of 180, up from N3'],
               ['Next target', 'JLPT N1, planned for July 2027']
             ]
           },
