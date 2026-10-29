@@ -704,6 +704,45 @@ body.dossier-open .string__pulse { animation-play-state: paused; }
   border-radius: 8px 8px 0 0;
 }
 
+/* second folder tab: look at the card's front instead of its file */
+.dossier__flip {
+  position: absolute;
+  right: 32px;
+  top: -34px;
+  height: 30px;
+  padding: 3px 16px 0;
+  font: inherit;
+  font-size: 14px;
+  letter-spacing: 0.14em;
+  line-height: 27px;
+  color: var(--yellow);
+  background: #1d2127;
+  border: 1px solid rgba(201, 166, 75, 0.55);
+  border-bottom: 0;
+  border-radius: 8px 8px 0 0;
+  cursor: pointer;
+}
+
+.dossier__flip[hidden], .dossier__face[hidden] { display: none; }
+.dossier__flip:hover { background: var(--yellow); color: var(--ink-dark); }
+
+/* shown while the card front is up: brings the file back */
+.dossier__face {
+  position: absolute;
+  left: 50%;
+  bottom: max(28px, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  min-height: 52px;
+  padding: 0 28px;
+  font: 700 16px/1 var(--font-mono);
+  letter-spacing: 0.16em;
+  color: var(--ink-dark);
+  background: var(--yellow);
+  border: 2px solid var(--ink-dark);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.6);
+  cursor: pointer;
+}
+
 .dossier__head {
   position: relative;
   flex: none;
@@ -863,6 +902,7 @@ a.dossier__link:hover { color: var(--ink-dark); background: var(--yellow); }
   .dossier__body { padding: 4px 20px 16px; }
   .dossier__foot { padding: 14px 20px 18px; }
   .dossier__tab { left: 18px; }
+  .dossier__flip { right: 14px; padding: 3px 10px 0; font-size: 12px; }
   .dossier__nav { width: 100%; }
   .dossier__navbtn { flex: 1; min-width: 0; }
   .dossier__rows { grid-template-columns: 1fr; gap: 0; }

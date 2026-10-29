@@ -100,6 +100,7 @@ Link previews need a picture at an **absolute** URL. Add an image (about 1200x63
 | Click or Enter on a card | fly to it and open its case file |
 | Touch: tap a card | fly to it; tap again or press **OPEN FILE** to open the case file |
 | Drag a card (mouse or pen) | move it; strings follow (positions reset on reload) |
+| **VIEW CARD FRONT** in a case file (board view) | show the card's front side for as long as you like; **READ THE FILE**, a click outside, or Esc brings the file back |
 | Arrow left / right in a case file | previous / next file, in `tour` order |
 | Esc | close the case file, or skip the intro |
 | Tab | moves through the controls and then the cards; focusing a card pans to it |
