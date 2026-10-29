@@ -10,8 +10,7 @@
  * flyToView, stop, syncCard, snapTo, snapFit, snapHome, onChange }.
  *
  * Two "auto" views re-apply themselves when the window resizes: fit (everything in
- * view) and home (the opening view: fit-all on desktop, the Subject File fitted to
- * the screen width on a phone).
+ * view) and home (the opening view, currently the same as fit).
  * onChange(fn) calls fn(state) on every camera change; it can be called before init.
  */
 (function () {
@@ -106,15 +105,7 @@
       minK = Math.min(MIN_K, k);
       fit = { cx: (x0 + x1) / 2, cy: (y0 + y1) / 2, k: Math.min(MAX_K, k) };
 
-      // Phones start on the title card, fitted to the screen width. A whole-board
-      // overview would be ~15% there and unreadable (FIT ALL is still one tap away).
-      var hero = byId('profile');
-      if (vw < 768 && hero) {
-        var hk = Math.min((0.92 * vw) / hero.w, (0.9 * vh) / hero.h);
-        home = { cx: hero.x, cy: hero.y, k: Math.max(minK, Math.min(MAX_K, hk)) };
-      } else {
-        home = fit;
-      }
+      home = fit;      // every screen opens on the whole board
     }
 
     function measure() {
@@ -280,7 +271,7 @@
 
     // "Reset": the Subject File centered at 100% (on a phone: the home view).
     function reset() {
-      if (vw < 768) return goHome();       // at 100% the title card would not fit a phone
+      if (vw < 768) return goHome();       // at 100% the title card would not fit a phone: start over instead
       return byId('profile') ? flyTo('profile', { k: 1 }) : fitAll();
     }
 

@@ -105,8 +105,8 @@ Link previews need a picture at an **absolute** URL. Add an image (about 1200x63
 | Esc | close the case file, or skip the intro |
 | Tab | moves through the controls and then the cards; focusing a card pans to it |
 
-On a phone the board opens centred on the title card, fitted to the screen width. FIT ALL shows
-the whole board.
+On a phone the board opens zoomed out to show the whole wall; pinch to zoom or tap a card to read it,
+and FIT ALL brings the whole board back.
 
 ## Accessibility
 

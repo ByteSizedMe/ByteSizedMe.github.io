@@ -172,10 +172,13 @@
     head.appendChild(summaryEl);
     head.appendChild(tagsEl);
 
+    // heading and sections scroll together (a long summary must not squeeze the sections
+    // out on a phone); the links and PREVIOUS / NEXT stay pinned below
+    var scroller = el('div', 'dossier__scroll');
+    scroller.tabIndex = 0;
+    scroller.setAttribute('role', 'region');
+    scroller.setAttribute('aria-label', 'File contents');
     var bodyEl = el('div', 'dossier__body');
-    bodyEl.tabIndex = 0;
-    bodyEl.setAttribute('role', 'region');
-    bodyEl.setAttribute('aria-label', 'File contents');
 
     var foot = el('div', 'dossier__foot');
     var linksEl = el('div', 'dossier__links');
@@ -194,9 +197,19 @@
     panel.appendChild(tab);
     panel.appendChild(flipBtn);
     panel.appendChild(closeBtn);
-    panel.appendChild(head);
-    panel.appendChild(bodyEl);
+    scroller.appendChild(head);
+    scroller.appendChild(bodyEl);
+    panel.appendChild(scroller);
     panel.appendChild(foot);
+
+    // On a phone (or a short window) the pinned links and PREVIOUS / NEXT would leave only a
+    // sliver to read in, so there they scroll with the file instead.
+    var compact = window.matchMedia('(max-width: 600px), (max-height: 640px)');
+    function placeFoot() {
+      if (compact.matches) scroller.appendChild(foot); else panel.appendChild(foot);
+    }
+    placeFoot();
+    if (compact.addEventListener) compact.addEventListener('change', placeFoot);
     dossier.appendChild(backdrop);
     dossier.appendChild(panel);
     dossier.appendChild(faceBtn);
@@ -302,7 +315,7 @@
 
       bodyEl.textContent = '';
       ((c.detail && c.detail.sections) || []).forEach(function (s) { bodyEl.appendChild(sectionEl(s)); });
-      bodyEl.scrollTop = 0;
+      scroller.scrollTop = 0;
 
       linksEl.textContent = '';
       (c.links || []).forEach(function (l) { linksEl.appendChild(linkEl(l)); });
