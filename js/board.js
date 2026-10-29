@@ -133,7 +133,7 @@
 
     var head = el('span', 'lvl-head');
     head.appendChild(el('span', 'card__label', c.label));
-    head.appendChild(el('span', 'card__title', c.title));
+    head.appendChild(el('span', 'card__title', c.shortTitle || c.title));
     if (c.subtitle) head.appendChild(el('span', 'card__subtitle', c.subtitle));
     body.appendChild(head);
 
