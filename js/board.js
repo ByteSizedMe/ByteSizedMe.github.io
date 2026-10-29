@@ -216,6 +216,8 @@
       var group = svgEl('g', { 'class': 'string', 'data-from': conn.from, 'data-to': conn.to });
       group.appendChild(svgEl('path', { 'class': 'string__glow', d: d, filter: 'url(#string-glow)' }));
       group.appendChild(svgEl('path', { 'class': 'string__core', d: d }));
+      // a short bright dash that travels along the string while it is highlighted
+      group.appendChild(svgEl('path', { 'class': 'string__pulse', d: d, pathLength: 1000 }));
       svg.appendChild(group);
     });
   }
