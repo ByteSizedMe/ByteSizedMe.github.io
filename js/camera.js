@@ -7,7 +7,7 @@
  *
  * Camera state is { x, y, k }: world origin position in screen px, and scale.
  * Public API: window.Camera = { flyTo, fitAll, reset, zoomBy, getState, getView,
- * flyToView, stop, onChange }.
+ * flyToView, stop, syncCard, onChange }.
  * onChange(fn) calls fn(state) on every camera change; it can be called before init.
  */
 (function () {
@@ -247,6 +247,7 @@
     }
 
     function fitAll() {
+      computeFit();   // cards may have been dragged since the last measure
       return animateTo(fit.cx, fit.cy, fit.k).then(function (arrived) {
         if (arrived) fitMode = true;
         return arrived;
@@ -372,9 +373,9 @@
 
     viewport.addEventListener('pointerdown', function (e) {
       if (e.pointerType === 'mouse' && e.button !== 0) return;
-      // a mouse press on a card is for the card (drag arrives in a later batch);
+      // a mouse or pen press on a card is for the card (board.js drags it);
       // touch can pan from anywhere, since cards cover most of the wall when zoomed in
-      if (e.pointerType === 'mouse' && e.target.closest('.card')) return;
+      if (e.pointerType !== 'touch' && e.target.closest('.card')) return;
 
       takeOver();
       pointers[e.pointerId] = { x: e.clientX, y: e.clientY };
@@ -560,13 +561,22 @@
     // ---- minimap -------------------------------------------------------
 
     if (minimap) {
+      var dots = {};
       data.cards.forEach(function (c) {
         var dot = document.createElement('span');
         dot.className = 'minimap__dot';
-        dot.style.left = (c.x / W) * 100 + '%';
-        dot.style.top = (c.y / H) * 100 + '%';
+        dots[c.id] = dot;
         minimap.appendChild(dot);
       });
+
+      // cards move when dragged: board.js calls this to keep the dots in step
+      window.Camera.syncCard = function (id) {
+        var c = byId(id);
+        if (!c || !dots[id]) return;
+        dots[id].style.left = (c.x / W) * 100 + '%';
+        dots[id].style.top = (c.y / H) * 100 + '%';
+      };
+      data.cards.forEach(function (c) { window.Camera.syncCard(c.id); });
 
       var mm = null;   // { sx, sy, moved }
 
