@@ -140,7 +140,7 @@ window.CASE = {
         ['GRADUATES', 'May 2028'],
         ['VENTURE', 'Rift Labs']
       ],
-      x: 1500, y: 1000, w: 480, h: 620, rot: -1.5,
+      x: 1500, y: 1000, w: 480, h: 740, rot: -1.5,
       fixture: 'pin', pinColor: 'red', pin: { x: 0.5, y: 0.035 },
       stamps: [{ text: 'CLASSIFIED', tone: 'red', rot: -12, at: [0.7, 0.92] }],
       hanko: { text: '承', size: 70, rot: -8, at: [0.17, 0.92] },
@@ -280,7 +280,7 @@ window.CASE = {
         ['SIGNALS', '15+ URL risk signals'],
         ['STACK', 'TypeScript, Node.js, Express, PostgreSQL']
       ],
-      x: 2700, y: 900, w: 340, h: 380, rot: 3.5,
+      x: 2680, y: 920, w: 400, h: 620, rot: 3.5,
       fixture: 'pin', pinColor: 'red', pin: { x: 0.5, y: 0.07 },
       stamps: [],
       zoomFocus: 1.6,
