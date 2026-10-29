@@ -65,7 +65,7 @@ window.CASE = {
       summary: 'Android security app on Google Play. Built under Rift Labs.',
       x: 1950, y: 430, w: 400, h: 540, rot: -3,
       fixture: 'tape', pinColor: 'steel', pin: { x: 0.5, y: 0.03 },
-      stamps: [{ text: 'DECLASSIFIED', tone: 'red', rot: 6, at: [0.47, 0.3] }],
+      stamps: [{ text: 'DECLASSIFIED', tone: 'red', rot: 6, at: [0.47, 0.3], size: 'sm' }],
       zoomFocus: 1.4,
       related: ['tech', 'sentinel']
     },
