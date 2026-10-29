@@ -28,6 +28,13 @@ Each card in `js/content.js` has a `summary`, `tags`, a near-zoom `preview`, dos
 to fill in. The board shows cards at three zoom levels (`zoomLevels` in the same file):
 far = icon + title, mid = + tags and summary, near = + content preview.
 
+## Case files
+
+Click (or Enter on) a card to open its dossier: the camera flies to it, strings light up,
+and the card flips into the case file. `detail.sections`, `links` and `related` in
+`js/content.js` fill it. Left / right arrows or the buttons move to a connected file;
+Esc, the X or the backdrop closes it and the camera returns.
+
 ## Controls
 
 Drag the wall to pan. Wheel / trackpad pinch / touch pinch zooms. Arrow keys pan,
@@ -35,4 +42,4 @@ Drag the wall to pan. Wheel / trackpad pinch / touch pinch zooms. Arrow keys pan
 
 ## Status
 
-Batch 3 of 7 (card content, semantic zoom). See `SPEC.md` for the plan.
+Batch 4 of 7 (dossier view and click transitions). See `SPEC.md` for the plan.
