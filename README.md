@@ -35,6 +35,14 @@ and the card flips into the case file. `detail.sections`, `links` and `related` 
 `js/content.js` fill it. Left / right arrows or the buttons move to a connected file;
 Esc, the X or the backdrop closes it and the camera returns.
 
+## Moving things around
+
+Cards can be dragged with a mouse or pen (positions reset on reload) and the strings
+follow. Hovering a card lifts and tilts it, lights its strings and outlines the cards
+it connects to. Strings sway gently when the board is idle and twang when a card is
+dropped; both stop under `prefers-reduced-motion`, in a hidden tab, while the camera
+moves, and while a dossier is open.
+
 ## Controls
 
 Drag the wall to pan. Wheel / trackpad pinch / touch pinch zooms. Arrow keys pan,
@@ -42,4 +50,4 @@ Drag the wall to pan. Wheel / trackpad pinch / touch pinch zooms. Arrow keys pan
 
 ## Status
 
-Batch 4 of 7 (dossier view and click transitions). See `SPEC.md` for the plan.
+Batch 5 of 7 (dragging, hover, string motion). See `SPEC.md` for the plan.
