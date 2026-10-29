@@ -83,7 +83,14 @@
     var polaroid = c.type === 'polaroid';
     card.type = 'button';
     card.dataset.id = c.id;
-    card.setAttribute('aria-label', c.title + ': ' + c.summary);
+    // No aria-label: the accessible name is the card's own visible text (WCAG "label in name"),
+    // so it follows the zoom level. The summary is the description, always available.
+    card.setAttribute('aria-haspopup', 'dialog');
+    var desc = el('span', 'card__desc', c.summary);
+    desc.id = 'card-desc-' + c.id;
+    desc.hidden = true;
+    card.appendChild(desc);
+    card.setAttribute('aria-describedby', desc.id);
     card.style.setProperty('--x', c.x - c.w / 2 + 'px');
     card.style.setProperty('--y', c.y - c.h / 2 + 'px');
     card.style.setProperty('--w', c.w + 'px');
@@ -101,8 +108,8 @@
     }
     card.appendChild(fixture);
 
+    // the far layer's title is the card's accessible name at far zoom, so it is NOT aria-hidden
     var far = el('span', 'lvl-far');
-    far.setAttribute('aria-hidden', 'true');
     far.appendChild(makeIcon(c.icon));
     far.appendChild(el('span', 'lvl-far__title', c.title));
 
@@ -228,7 +235,7 @@
   }
 
   /*
-   * Each string is a group of paths: three wide, faint strokes that fake the red
+   * Each string is a group of paths: two wide, faint strokes that fake the red
    * glow, the cord itself, and a pulse dash. The glow is stacked strokes rather
    * than an SVG blur filter on purpose: a blur over this much board made every
    * drag and sway tick repaint-bound (measured ~8x slower frames), and gets worse
@@ -246,8 +253,7 @@
 
       var group = svgEl('g', { 'class': 'string', 'data-from': conn.from, 'data-to': conn.to });
       var paths = [];
-      ['string__glow string__glow--1', 'string__glow string__glow--2', 'string__glow string__glow--3',
-        'string__core'].forEach(function (cls) {
+      ['string__glow string__glow--1', 'string__glow string__glow--2', 'string__core'].forEach(function (cls) {
         // pathLength 1000 lets the intro draw each string in with stroke-dashoffset
         var path = svgEl('path', { 'class': cls, pathLength: 1000 });
         group.appendChild(path);
@@ -340,6 +346,7 @@
 
   function dossierOpen() { return document.body.classList.contains('dossier-open'); }
   function introRunning() { return document.body.classList.contains('intro-running'); }
+  function listMode() { return document.documentElement.classList.contains('list-mode'); }
   // while a card is focused (click -> dossier) or the intro plays, hover and drag stay out of the way
   function busy() { return world.classList.contains('has-focus') || dossierOpen() || introRunning(); }
 
@@ -395,7 +402,7 @@
   }
 
   function swayAllowed() {
-    return !motion.tooSlow && !reduceMotion.matches && !document.hidden && !dragging && !dossierOpen() && !introRunning() &&
+    return !motion.tooSlow && !reduceMotion.matches && !document.hidden && !dragging && !dossierOpen() && !introRunning() && !listMode() &&
       performance.now() >= motion.busyUntil;
   }
 
@@ -460,7 +467,7 @@
   function scheduleResume() {
     if (motion.resume || document.hidden) return;
     var wait = Math.max(motion.busyUntil - performance.now(), 0) + 40;
-    if (dossierOpen() || introRunning()) wait = Math.max(wait, 500);
+    if (dossierOpen() || introRunning() || listMode()) wait = Math.max(wait, 500);
     motion.resume = setTimeout(function () {
       motion.resume = 0;
       if (swayAllowed() || motion.twangs > 0) startLoop(); else scheduleResume();

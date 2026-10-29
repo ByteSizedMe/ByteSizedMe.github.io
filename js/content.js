@@ -125,7 +125,7 @@ window.CASE = {
           label: 'Download resume (PDF)',
           url: 'assets/resume.pdf',
           kind: 'resume',
-          note: 'Placeholder path: add the file at assets/resume.pdf'
+          note: 'Placeholder file: replace assets/resume.pdf with your resume'
         }
       ]
     },
