@@ -29,6 +29,16 @@ window.CASE = {
    */
   zoomLevels: { mid: 0.72, near: 1.05, hysteresis: 0.02 },
 
+  /*
+   * Atmosphere. The Japan layer is an accent: a dim rising-sun circle behind the
+   * board center and a few very faint sakura petals drifting over the screen.
+   * Everything here is switched off under prefers-reduced-motion where it moves.
+   */
+  atmosphere: {
+    sun: { x: 1500, y: 1000, r: 560 },   // world units
+    petals: { count: 10 }
+  },
+
   // Free-floating stamps on the wall itself. at = world coordinates (center).
   boardStamps: [
     { text: 'CASE FILE No. 001', tone: 'red', rot: -6, at: [420, 240], size: 'lg' },
@@ -60,6 +70,9 @@ window.CASE = {
    *   redacted:  true adds the black redaction bars
    *   fixture:   pin | tape | both   (pinColor: red | yellow | steel)
    *   stamps:    [{ text, tone: red|black|yellow, size?: sm|lg|xl, rot, at: [fx, fy] }]
+   *   hanko:     optional red seal { text (1-2 characters), size (px), rot, at: [fx, fy] }
+   *   vertical:  optional Japanese label set vertically along the card's right edge
+   *   washi:     true | 'strong': washi-paper fibre texture on top of the card paper
    *   zoomFocus: scale the camera flies to for this card
    *   related:   ids for next/previous navigation along strings (dossier view)
    *   detail:    { sections: [...] } for the dossier view. Each section has a
@@ -86,6 +99,7 @@ window.CASE = {
       x: 1500, y: 1000, w: 480, h: 620, rot: -1.5,
       fixture: 'pin', pinColor: 'red', pin: { x: 0.5, y: 0.035 },
       stamps: [{ text: 'CLASSIFIED', tone: 'red', rot: -12, at: [0.7, 0.92] }],
+      hanko: { text: '承', size: 70, rot: -8, at: [0.17, 0.92] },
       zoomFocus: 1.2,
       related: ['tech', 'japanese'],
       detail: {
@@ -133,6 +147,7 @@ window.CASE = {
       x: 820, y: 560, w: 440, h: 380, rot: 2.5,
       fixture: 'pin', pinColor: 'yellow', pin: { x: 0.5, y: 0.06 },
       stamps: [],
+      vertical: '技術',
       zoomFocus: 1.5,
       related: ['profile', 'vault', 'phishguard', 'sentinel'],
       detail: {
@@ -162,6 +177,7 @@ window.CASE = {
       x: 1950, y: 430, w: 400, h: 540, rot: -3,
       fixture: 'tape', pinColor: 'steel', pin: { x: 0.5, y: 0.03 },
       stamps: [{ text: 'DECLASSIFIED', tone: 'red', rot: 6, at: [0.47, 0.3], size: 'sm' }],
+      vertical: '公開済み',
       zoomFocus: 1.4,
       related: ['tech', 'sentinel'],
       detail: {
@@ -225,6 +241,7 @@ window.CASE = {
       x: 2350, y: 1500, w: 480, h: 460, rot: -2,
       fixture: 'pin', pinColor: 'steel', pin: { x: 0.8, y: 0.04 },
       stamps: [{ text: 'CLASSIFIED: IN DEVELOPMENT', tone: 'red', rot: -8, at: [0.5, 0.86] }],
+      vertical: '開発中',
       zoomFocus: 1.4,
       related: ['vault', 'tech'],
       detail: {
@@ -258,9 +275,12 @@ window.CASE = {
         ['PROGRESS', 'TODO'],
         ['GOAL', 'Work in Japan, combining software engineering and cybersecurity']
       ],
-      x: 820, y: 1400, w: 420, h: 540, rot: 2,
+      x: 820, y: 1400, w: 420, h: 620, rot: 2,
       fixture: 'both', pinColor: 'red', pin: { x: 0.78, y: 0.035 },
       stamps: [],
+      hanko: { text: '日本', size: 132, rot: 9, at: [0.74, 0.88] },
+      vertical: '日本語学習',
+      washi: 'strong',
       zoomFocus: 1.4,
       related: ['profile', 'contact'],
       detail: {
@@ -293,7 +313,9 @@ window.CASE = {
       ],
       x: 1450, y: 1700, w: 460, h: 300, rot: -2.5,
       fixture: 'pin', pinColor: 'yellow', pin: { x: 0.5, y: 0.07 },
-      stamps: [{ text: 'TOP SECRET', tone: 'red', rot: 8, at: [0.68, 0.9] }],
+      stamps: [{ text: 'TOP SECRET', tone: 'red', rot: 8, at: [0.7, 0.93] }],
+      vertical: '連絡先',
+      washi: true,
       zoomFocus: 1.5,
       related: ['japanese'],
       detail: {
