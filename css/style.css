@@ -165,6 +165,7 @@ body { font-family: var(--font-type); }
 }
 
 .card > span { display: block; }
+:where(.lvl-head, .lvl-mid, .lvl-near) > span { display: block; }
 
 .card > .card__body {
   display: flex;
@@ -201,7 +202,7 @@ body { font-family: var(--font-type); }
 }
 
 .card__status {
-  align-self: flex-start;
+  display: inline-block;
   margin-top: 20px;
   padding: 4px 12px;
   border: 3px solid var(--yellow);
@@ -337,7 +338,7 @@ body { font-family: var(--font-type); }
 .card--index .card__body { padding-top: 30px; }
 .card--index .card__label { color: var(--ink-red-on-light); }
 .card--index .card__title { font-size: 40px; margin-top: 30px; }
-.card--index .card__summary { font-size: 23px; margin-top: 26px; }
+.card--index .card__summary { font-size: 23px; margin-top: 16px; }
 
 /* ---- polaroid ------------------------------------------------------ */
 
@@ -356,13 +357,18 @@ body { font-family: var(--font-type); }
   background: repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.03) 0 2px, transparent 2px 6px),
     linear-gradient(150deg, #20252b, #0d0f12);
   box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.7);
-  display: flex !important;
-  justify-content: center;
-  align-items: flex-end;
-  padding-bottom: 22px;
+  display: block !important;
+  position: relative;
 }
 
-.card__placeholder { font-size: 22px; letter-spacing: 0.2em; color: #8a8f96; }
+.card__placeholder {
+  position: absolute;
+  top: 36px;
+  left: 16px;
+  font-size: 16px;
+  letter-spacing: 0.2em;
+  color: #8a8f96;
+}
 
 .card--polaroid .card__body { padding: 16px 4px 0; flex: 1; }
 .card--polaroid .card__label { font-size: 17px; color: var(--ink-red-on-light); }
@@ -378,7 +384,7 @@ body { font-family: var(--font-type); }
 }
 
 .card--sticky .card__body { padding-top: 50px; }
-.card--sticky .card__label { color: #4a3a0a; }
+.card--sticky .card__label { color: #2e2305; }
 .card--sticky .card__title { font-family: var(--font-hand); font-weight: 700; font-size: 66px; margin-top: 8px; }
 .card--sticky .card__summary { font-family: var(--font-hand); font-weight: 500; font-size: 38px; line-height: 1.1; }
 
@@ -415,6 +421,166 @@ body { font-family: var(--font-type); }
   background: #000;
   box-shadow: 0 0 0 1px #3a3f47;
 }
+
+/* ---- semantic zoom layers ------------------------------------------ */
+/* #world[data-zoom-level] is set by board.js from the camera scale. Layers are
+   stacked in the same space and cross-faded; hidden layers also drop out of
+   hit-testing and the accessibility tree (visibility). */
+
+.lvl-far,
+.lvl-head,
+.lvl-mid,
+.lvl-near,
+.lvl-keep {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0s linear 0.3s;
+}
+
+.world[data-zoom-level="far"] .lvl-far,
+.world[data-zoom-level="mid"] .lvl-head,
+.world[data-zoom-level="mid"] .lvl-mid,
+.world[data-zoom-level="mid"] .lvl-keep,
+.world[data-zoom-level="near"] .lvl-head,
+.world[data-zoom-level="near"] .lvl-near,
+.world[data-zoom-level="near"] .lvl-keep,
+.world[data-zoom-level="near"] .card--polaroid .card__detail > .lvl-mid,
+.card--polaroid .lvl-head {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.3s ease 0.1s, visibility 0s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lvl-far, .lvl-head, .lvl-mid, .lvl-near, .lvl-keep { transition: none !important; }
+}
+
+/* mid and near share one grid cell so the card does not reflow while fading */
+.card__detail { display: grid; }
+.card__detail > * { grid-area: 1 / 1; align-self: start; }
+
+/* far: icon + title, centered */
+.card > .lvl-far {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 28px;
+  text-align: center;
+  color: var(--yellow);
+}
+
+.card__icon {
+  width: 140px;
+  height: 140px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.lvl-far__title {
+  font-family: var(--font-head);
+  font-size: var(--far-size, 56px);
+  line-height: 1.05;
+  color: var(--ink-light);
+}
+
+.card--dossier:not(.card--washi) { --far-size: 128px; }
+.card--washi { --far-size: 76px; }
+.card--index { --far-size: 44px; }
+.card--sticky { --far-size: 70px; }
+.card--folder { --far-size: 68px; }
+
+.card--index > .lvl-far,
+.card--washi > .lvl-far { color: var(--ink-red-on-light); }
+.card--sticky > .lvl-far { color: #2e2305; }
+.card--index .lvl-far__title,
+.card--washi .lvl-far__title,
+.card--sticky .lvl-far__title { color: var(--ink-dark); }
+.card--sticky .lvl-far__title { font-family: var(--font-hand); font-weight: 700; }
+.card--index .card__icon { width: 84px; height: 84px; }
+.card--folder > .lvl-far { padding-bottom: 110px; }
+
+/* mid: tag chips */
+.card__tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+
+.tag {
+  display: inline-block;
+  padding: 3px 10px;
+  border: 2px solid currentColor;
+  font-size: 18px;
+  line-height: 1.2;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--yellow);
+}
+
+.tag.is-todo { border-style: dashed; }
+.card--index .tag,
+.card--washi .tag { color: var(--ink-red-on-light); }
+.card--sticky .tag { color: #2e2305; }
+
+/* near: content preview rows */
+.card__preview {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 10px 16px;
+  align-items: baseline;
+  margin-top: 22px;
+}
+
+.pv__k {
+  font-size: 16px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--yellow);
+}
+
+.pv__v { font-size: 22px; line-height: 1.3; }
+.pv__v.is-todo { font-style: italic; opacity: 0.8; }
+
+.card--index .pv__k,
+.card--washi .pv__k { color: var(--ink-red-on-light); }
+.card--sticky .pv__k { color: #2e2305; }
+.card--index .card__preview { margin-top: 16px; gap: 6px 14px; }
+.card--index .pv__v { font-size: 21px; }
+.card--sticky .pv__v { font-family: var(--font-hand); font-weight: 500; font-size: 34px; line-height: 1.1; }
+
+/* polaroid: the photo carries the icon, tags and preview */
+.card--polaroid > .card__media .lvl-far {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  color: var(--yellow);
+}
+
+.card--polaroid .lvl-far__title { display: none; }
+.card--polaroid .lvl-far .card__icon { width: 150px; height: 150px; }
+.card--polaroid .card__tags { position: absolute; left: 16px; right: 16px; bottom: 16px; margin: 0; }
+
+.card--polaroid .card__preview {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  padding: 18px 22px;
+  align-content: end;
+  background: rgba(8, 9, 11, 0.66);
+  color: var(--ink-light);
+}
+
+.card--polaroid .pv__k { color: var(--yellow); }
+.card--polaroid .card__placeholder { transition: opacity 0.3s ease; }
+.world[data-zoom-level="near"] .card--polaroid .card__placeholder { opacity: 0; }
 
 /* ---- camera HUD ---------------------------------------------------- */
 
