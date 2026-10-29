@@ -162,6 +162,29 @@
       card.appendChild(stamp);
     });
 
+    // Japan accents: all decorative, so hidden from assistive tech
+    if (c.hanko) {
+      var h = c.hanko;
+      var seal = el('span', 'hanko' + ((h.text || '').length > 1 ? ' hanko--tall' : ''), h.text);
+      seal.lang = 'ja';
+      seal.setAttribute('aria-hidden', 'true');
+      seal.style.setProperty('--rot', h.rot + 'deg');
+      seal.style.setProperty('--hs', h.size + 'px');
+      seal.style.left = h.at[0] * 100 + '%';
+      seal.style.top = h.at[1] * 100 + '%';
+      card.appendChild(seal);
+    }
+    if (c.vertical) {
+      var vert = el('span', 'card__vertical', c.vertical);
+      vert.lang = 'ja';
+      vert.setAttribute('aria-hidden', 'true');
+      card.appendChild(vert);
+    }
+    if (c.washi) {
+      card.classList.add('is-washi');
+      if (c.washi === 'strong') card.classList.add('is-washi--strong');
+    }
+
     return card;
   }
 
@@ -225,7 +248,8 @@
       var paths = [];
       ['string__glow string__glow--1', 'string__glow string__glow--2', 'string__glow string__glow--3',
         'string__core'].forEach(function (cls) {
-        var path = svgEl('path', { 'class': cls });
+        // pathLength 1000 lets the intro draw each string in with stroke-dashoffset
+        var path = svgEl('path', { 'class': cls, pathLength: 1000 });
         group.appendChild(path);
         paths.push(path);
       });
@@ -251,6 +275,18 @@
   }
 
   // ---- init -----------------------------------------------------------
+
+  // dim rising-sun circle behind the board center (under the strings)
+  var sunCfg = data.atmosphere && data.atmosphere.sun;
+  if (sunCfg) {
+    var sun = document.createElement('div');
+    sun.className = 'sun';
+    sun.setAttribute('aria-hidden', 'true');
+    sun.style.left = sunCfg.x - sunCfg.r + 'px';
+    sun.style.top = sunCfg.y - sunCfg.r + 'px';
+    sun.style.width = sun.style.height = sunCfg.r * 2 + 'px';
+    world.insertBefore(sun, svg);
+  }
 
   renderStrings();
   data.boardStamps.forEach(function (s) {
@@ -303,8 +339,9 @@
   var zTop = 10;             // stacking order: the last card dropped sits on top
 
   function dossierOpen() { return document.body.classList.contains('dossier-open'); }
-  // while a card is focused (click -> dossier) hover and drag stay out of the way
-  function busy() { return world.classList.contains('has-focus') || dossierOpen(); }
+  function introRunning() { return document.body.classList.contains('intro-running'); }
+  // while a card is focused (click -> dossier) or the intro plays, hover and drag stay out of the way
+  function busy() { return world.classList.contains('has-focus') || dossierOpen() || introRunning(); }
 
   function cardAt(id) { return world.querySelector('.card[data-id="' + id + '"]'); }
 
@@ -358,7 +395,7 @@
   }
 
   function swayAllowed() {
-    return !motion.tooSlow && !reduceMotion.matches && !document.hidden && !dragging && !dossierOpen() &&
+    return !motion.tooSlow && !reduceMotion.matches && !document.hidden && !dragging && !dossierOpen() && !introRunning() &&
       performance.now() >= motion.busyUntil;
   }
 
@@ -423,7 +460,7 @@
   function scheduleResume() {
     if (motion.resume || document.hidden) return;
     var wait = Math.max(motion.busyUntil - performance.now(), 0) + 40;
-    if (dossierOpen()) wait = Math.max(wait, 500);
+    if (dossierOpen() || introRunning()) wait = Math.max(wait, 500);
     motion.resume = setTimeout(function () {
       motion.resume = 0;
       if (swayAllowed() || motion.twangs > 0) startLoop(); else scheduleResume();

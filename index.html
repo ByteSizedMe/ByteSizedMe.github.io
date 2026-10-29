@@ -10,6 +10,23 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Caveat:wght@500;700&family=Courier+Prime:wght@400;700&family=Noto+Sans+JP:wght@700&family=Special+Elite&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
+  <script>
+    /* Decide before first paint whether the intro plays, so the board never flashes
+       fully built first. Plays once per session (and never under reduced motion);
+       ?intro=1 replays it, ?intro=0 skips it. js/intro.js takes over from here. */
+    (function () {
+      try {
+        var q = location.search.match(/[?&]intro=(\d)/);
+        var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+        var play = !reduced && (q ? q[1] === '1' : !sessionStorage.getItem('bytesized.intro'));
+        if (play) {
+          document.documentElement.classList.add('intro-pending');
+          // failsafe: never leave the board hidden if the intro script does not start
+          setTimeout(function () { document.documentElement.classList.remove('intro-pending'); }, 4000);
+        }
+      } catch (e) { /* storage blocked: just skip the intro */ }
+    })();
+  </script>
 </head>
 <body>
   <h1 class="sr-only">Byte: Software Engineer, Application Security &amp; Mobile</h1>
@@ -32,6 +49,10 @@
   <div id="minimap" class="minimap" aria-hidden="true">
     <div id="minimap-view" class="minimap__view"></div>
   </div>
+
+  <!-- film grain and scanlines: pure CSS, very low opacity, on top of the board -->
+  <div class="fx fx--grain" aria-hidden="true"></div>
+  <div class="fx fx--scan" aria-hidden="true"></div>
 
   <noscript><p class="noscript">This case board needs JavaScript. Contact: see README.</p></noscript>
 

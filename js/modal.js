@@ -384,7 +384,7 @@
     }
 
     function open(id) {
-      if (state !== STATE.CLOSED || !cardEl(id)) return;
+      if (state !== STATE.CLOSED || !cardEl(id) || document.body.classList.contains('intro-running')) return;
       state = STATE.FLYING;
       current = id;
       trail = [];
@@ -484,7 +484,7 @@
 
     // Focusing a card with the keyboard pans the camera to it.
     world.addEventListener('focusin', function (e) {
-      if (state !== STATE.CLOSED || suppressFocusPan) return;
+      if (state !== STATE.CLOSED || suppressFocusPan || document.body.classList.contains('intro-running')) return;
       var card = e.target.closest('.card');
       if (!card || !card.matches(':focus-visible')) return;
       Camera.flyTo(card.dataset.id, { k: Camera.getState().k });
