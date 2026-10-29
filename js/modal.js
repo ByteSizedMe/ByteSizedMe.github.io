@@ -251,7 +251,14 @@
       var wrap = el('div', 'dossier__link-wrap');
       var todo = /^TODO/.test(l.url);
       var node;
-      if (todo) {
+      if (l.kind === 'preview' && !todo) {
+        // opens the resume viewer on top of this case file
+        node = el('button', 'dossier__link dossier__link--preview', l.label);
+        node.type = 'button';
+        node.setAttribute('aria-haspopup', 'dialog');
+        node.appendChild(el('span', 'dossier__ext', ' ▸')).setAttribute('aria-hidden', 'true');
+        node.addEventListener('click', function () { if (window.ResumeViewer) ResumeViewer.open(l, node); });
+      } else if (todo) {
         node = el('span', 'dossier__link is-todo', l.label + ': TODO');
       } else {
         node = el('a', 'dossier__link', l.label);

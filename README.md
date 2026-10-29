@@ -67,7 +67,14 @@ Each entry in `cards` looks like this (see the comment at the top of the file fo
 
 - **Fill in a placeholder:** replace the `TODO` text. A link with `url: 'TODO'` shows as a dashed,
   non-clickable chip until you give it a real address.
-- **Resume:** replace `assets/resume.pdf` with a newer PDF when you have one.
+- **Resume:** the profile file has a **Preview resume** button that opens a viewer (zoom, download,
+  open in a new tab). It shows `assets/resume-preview.png`, a picture of the page, because phones cannot
+  show a PDF inline; `assets/resume.pdf` is what gets downloaded. When you update the resume, replace the
+  PDF and regenerate the picture (needs poppler and ImageMagick):
+  ```bash
+  pdftoppm -r 190 -png -singlefile assets/resume.pdf assets/resume-preview
+  convert assets/resume-preview.png -colors 48 -depth 8 PNG8:assets/resume-preview.png
+  ```
 - **Add a project:** copy a card, give it a new `id`, pick a position, add its `id` to `tour`
   (see below), and add `connections` entries so strings reach it.
 - **Order of PREVIOUS / NEXT FILE:** the `tour` list near the top, e.g.
@@ -140,7 +147,9 @@ js/content.js     ALL content and layout (edit this)
 js/board.js       builds cards and strings, drag, hover, string motion, zoom levels
 js/camera.js      pan, zoom, fly-to, minimap, HUD
 js/modal.js       case file (dossier) view and touch select / open
+js/resume.js      resume preview viewer
 js/list.js        list view
 js/intro.js       intro sequence, stamps, spotlight, petals
-assets/           favicon.svg (the site icon), icon-512.png and other PNG sizes, resume.pdf
+assets/           favicon.svg (the site icon), icon-512.png and other PNG sizes, resume.pdf,
+                  resume-preview.png (picture of the resume page for the viewer)
 ```
