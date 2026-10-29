@@ -6,7 +6,8 @@
  * strings follow for free and are never re-rendered while the camera moves.
  *
  * Camera state is { x, y, k }: world origin position in screen px, and scale.
- * Public API: window.Camera = { flyTo, fitAll, reset, zoomBy, getState, onChange }.
+ * Public API: window.Camera = { flyTo, fitAll, reset, zoomBy, getState, getView,
+ * flyToView, stop, onChange }.
  * onChange(fn) calls fn(state) on every camera change; it can be called before init.
  */
 (function () {
@@ -188,7 +189,9 @@
     // Eased camera move. Zoom is interpolated in log space and the center point
     // linearly in world space, which keeps long flights smooth. Resolves true on
     // arrival, false if something interrupted it.
-    function animateTo(cx, cy, k) {
+    // `arc` (world units) bows the path downward at its midpoint, so a flight between
+    // two cards can follow the sag of the string that joins them.
+    function animateTo(cx, cy, k, arc) {
       var to = solve(cx, cy, k);
       var from = center();
       stopMotion();
@@ -213,7 +216,8 @@
           if (start === null) start = now;
           var p = Math.min(1, (now - start) / duration);
           var e = easeInOutCubic(p);
-          setViewFromCenter(lerp(from.cx, to.cx, e), lerp(from.cy, to.cy, e), Math.exp(lerp(lk0, lk1, e)));
+          setViewFromCenter(lerp(from.cx, to.cx, e), lerp(from.cy, to.cy, e) + 4 * e * (1 - e) * (arc || 0),
+            Math.exp(lerp(lk0, lk1, e)));
           if (p < 1) {
             anim.raf = requestAnimationFrame(step);
           } else {
@@ -239,7 +243,7 @@
       var k = (opts && opts.k) || card.zoomFocus || 1;
       // never zoom in so far that the card spills out of the viewport
       k = Math.min(k, (0.9 * vw) / card.w, (0.9 * vh) / card.h);
-      return animateTo(card.x, card.y, k);
+      return animateTo(card.x, card.y, k, opts && opts.arc);
     }
 
     function fitAll() {
@@ -252,6 +256,17 @@
     // "Reset" is the home view: the Subject File centered at 100%.
     function reset() {
       return byId('profile') ? flyTo('profile', { k: 1 }) : fitAll();
+    }
+
+    // A restorable view: center + scale, plus whether it was "fit all" (so it re-fits on resize).
+    function getView() {
+      var c = center();
+      return { cx: c.cx, cy: c.cy, k: c.k, fit: fitMode };
+    }
+
+    function flyToView(v) {
+      if (v.fit) return fitAll();
+      return animateTo(v.cx, v.cy, v.k);
     }
 
     function zoomBy(factor) {
@@ -293,7 +308,14 @@
       startZoomLoop();
     }
 
+    // The dossier overlay owns the screen while it is open: no camera input.
+    function locked() { return document.body.classList.contains('dossier-open'); }
+
     document.addEventListener('wheel', function (e) {
+      if (locked()) {
+        if (e.ctrlKey) e.preventDefault();
+        return;
+      }
       if (e.target.closest && e.target.closest('.hud, .minimap')) {
         if (e.ctrlKey) e.preventDefault();   // keep the page itself from zooming
         return;
@@ -500,7 +522,7 @@
     }
 
     document.addEventListener('keydown', function (e) {
-      if (e.ctrlKey || e.metaKey || e.altKey || isTyping(e.target)) return;
+      if (locked() || e.ctrlKey || e.metaKey || e.altKey || isTyping(e.target)) return;
       var key = e.key;
       if (key === 'ArrowLeft' || key === 'ArrowRight' || key === 'ArrowUp' || key === 'ArrowDown') {
         e.preventDefault();
@@ -605,6 +627,9 @@
     window.Camera.fitAll = fitAll;
     window.Camera.reset = reset;
     window.Camera.zoomBy = zoomBy;
+    window.Camera.getView = getView;
+    window.Camera.flyToView = flyToView;
+    window.Camera.stop = stopMotion;
     window.Camera.getState = function () { return { x: cam.x, y: cam.y, k: cam.k }; };
   }
 
