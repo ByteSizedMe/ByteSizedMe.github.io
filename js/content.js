@@ -218,7 +218,7 @@ window.CASE = {
           { heading: 'CS FUNDAMENTALS', list: ['Data structures and algorithms', 'Object-oriented design', 'Databases (DBMS)', 'Operating systems', 'Computer networks', 'Debugging', 'Testing'] },
           { heading: 'MOBILE', list: ['Android (Jetpack Compose)', 'React Native (Expo)', 'React'] },
           { heading: 'SECURITY', list: ['AES-256-GCM encryption', 'PBKDF2WithHmacSHA256 key derivation', 'Android Keystore', 'Biometric authentication (BiometricPrompt)', 'Session management', 'Web application security', 'RBAC authorization (Sentinel, planned)'] },
-          { heading: 'BACKEND & CLOUD', list: ['Node.js with Express', 'REST API design', 'PostgreSQL', 'Firebase Auth and Firestore', 'AWS (the basics)', 'Hosting on Render', 'Go (Sentinel, planned)'] },
+          { heading: 'BACKEND & CLOUD', list: ['Node.js with Express', 'REST API design', 'PostgreSQL', 'Firebase Auth and Firestore', 'AWS (the basics)', 'Hosting on Render', 'Redis and Docker Compose (Sentinel)', 'Go (Sentinel, planned)'] },
           { heading: 'HOW I WORK', list: ['Git and GitHub', 'Code reviews', 'Build and release pipelines (EAS Build)', 'Android Studio', 'Linux'] }
         ]
       },
@@ -303,12 +303,13 @@ window.CASE = {
       label: 'PENDING / UPCOMING',
       icon: 'eye',
       title: 'Sentinel',
-      summary: 'Go RBAC authorization microservice.',
-      tags: ['GO', 'RBAC', 'MICROSERVICE'],
+      summary: 'A Go service that answers "can this user do this?" with allow or deny. Anything not granted is denied.',
+      tags: ['GO', 'RBAC', 'POSTGRES', 'REDIS'],
       status: 'PLANNED: JAN 2027',
       preview: [
         ['LANGUAGE', 'Go'],
         ['TYPE', 'RBAC authorization microservice'],
+        ['STORAGE', 'PostgreSQL, Redis cache'],
         ['PLANNED', 'Jan 2027']
       ],
       redacted: true,
@@ -319,7 +320,18 @@ window.CASE = {
       zoomFocus: 1.4,
       detail: {
         sections: [
-          { heading: 'OVERVIEW', text: 'Go RBAC authorization microservice. Pending / upcoming, planned for Jan 2027.' },
+          {
+            heading: 'OVERVIEW',
+            text: 'Sentinel is a Go microservice that other services call to ask one question: can user X do action Y on resource Z? It replies with allow or deny plus a reason, and anything that has not been explicitly granted is denied.'
+          },
+          {
+            heading: 'HOW IT WORKS',
+            list: [
+              'A JSON HTTP API for managing roles, resources and permissions, granting permissions to roles and assigning roles to users',
+              'One authorize endpoint returns the decision and writes it to an append-only audit log',
+              'Every route under /v1 needs a signed JWT'
+            ]
+          },
           {
             heading: 'STATUS',
             rows: [
@@ -328,7 +340,33 @@ window.CASE = {
               ['Planned', 'Jan 2027']
             ]
           },
-          { heading: 'SCOPE', text: 'TODO: planned features and design notes.' }
+          {
+            heading: 'CACHING',
+            text: 'Decisions are cached in Redis using the cache-aside pattern. Whenever a policy changes, a generation counter moves forward once the database commit has landed, so every older cached entry stops matching at once. If Redis goes down, requests fall back to PostgreSQL and the service keeps running.'
+          },
+          {
+            heading: 'SECURITY DESIGN',
+            list: [
+              'Deny by default: unknown users, resources and actions, and every error path, end in a denial or a 500, never an allow',
+              'Parameterized SQL only, with strict input validation and request size limits',
+              'JWT checks on HS256: expiry, issuer, audience and subject are required, and every failure gets the same generic 401',
+              'The audit log is append-only, enforced by database triggers. If an audit write fails, no decision is returned'
+            ]
+          },
+          {
+            heading: 'TESTING',
+            text: 'Unit tests, store tests against a real PostgreSQL, and full-stack integration tests that run against Postgres and Redis, including with the cache switched off and with Redis unreachable. Local benchmarks showed the cache saving under 10% per decision, since container round trips dominate, so I don’t claim a big speed-up.'
+          },
+          {
+            heading: 'KNOWN LIMITS',
+            list: [
+              'No role hierarchies, deny rules or wildcard permissions: access is an exact match on role, action and resource',
+              'HS256 with a shared secret only, so no RS256 or key rotation yet',
+              'Any valid token can change policy; per-caller permissions are future work',
+              'Single instance, with no rate limiting or pagination yet'
+            ]
+          },
+          { heading: 'BUILT WITH', list: ['Go', 'Chi', 'PostgreSQL (pgx, raw SQL)', 'Redis (go-redis)', 'golang-migrate', 'Docker Compose'] }
         ]
       },
       links: [
