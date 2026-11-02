@@ -183,7 +183,7 @@ window.CASE = {
               'JLPT N2 certified, with a score of 156 out of 180'
             ]
           },
-          { heading: 'SKILLS OVERVIEW', text: 'Comfortable in Python, Java, C, Kotlin, JavaScript and TypeScript. I build for Android and React Native, write backends in Node.js with PostgreSQL, and care most about application and mobile security. The full breakdown is in the Tech Stack file.' }
+          { heading: 'SKILLS OVERVIEW', text: 'Comfortable in Python, Java, C, Go, Kotlin, JavaScript and TypeScript. I build for Android and React Native, write backends in Node.js and Go on PostgreSQL, and care most about application and mobile security. The full breakdown is in the Tech Stack file.' }
         ]
       },
       links: [
@@ -203,8 +203,8 @@ window.CASE = {
       preview: [
         ['LANGUAGES', 'Python, Java, C, Kotlin, JS, TS'],
         ['MOBILE', 'Android, React Native'],
-        ['SECURITY', 'AES-256-GCM, Android Keystore'],
-        ['BACKEND', 'Node.js, PostgreSQL, Go (planned)'],
+        ['SECURITY', 'JWT, RBAC, AES-256-GCM'],
+        ['BACKEND', 'Node.js, Go, PostgreSQL, Redis'],
         ['TOOLS', 'Git, GitHub, Linux']
       ],
       x: 820, y: 560, w: 440, h: 380, rot: 2.5,
@@ -214,12 +214,12 @@ window.CASE = {
       zoomFocus: 1.5,
       detail: {
         sections: [
-          { heading: 'LANGUAGES', list: ['Python', 'Java', 'C', 'SQL', 'Kotlin', 'JavaScript', 'TypeScript'] },
-          { heading: 'CS FUNDAMENTALS', list: ['Data structures and algorithms', 'Object-oriented design', 'Databases (DBMS)', 'Operating systems', 'Computer networks', 'Debugging', 'Testing'] },
+          { heading: 'LANGUAGES', list: ['Python', 'Java', 'C', 'SQL', 'Go', 'Kotlin', 'JavaScript', 'TypeScript'] },
+          { heading: 'CS FUNDAMENTALS', list: ['Data structures and algorithms', 'Object-oriented design', 'Databases (DBMS)', 'Operating systems', 'Computer networks', 'Testing'] },
           { heading: 'MOBILE', list: ['Android (Jetpack Compose)', 'React Native (Expo)', 'React'] },
-          { heading: 'SECURITY', list: ['AES-256-GCM encryption', 'PBKDF2WithHmacSHA256 key derivation', 'Android Keystore', 'Biometric authentication (BiometricPrompt)', 'Session management', 'Web application security', 'RBAC authorization (Sentinel, planned)'] },
-          { heading: 'BACKEND & CLOUD', list: ['Node.js with Express', 'REST API design', 'PostgreSQL', 'Firebase Auth and Firestore', 'AWS (the basics)', 'Hosting on Render', 'Redis and Docker Compose (Sentinel)', 'Go (Sentinel, planned)'] },
-          { heading: 'HOW I WORK', list: ['Git and GitHub', 'Code reviews', 'Build and release pipelines (EAS Build)', 'Android Studio', 'Linux'] }
+          { heading: 'SECURITY', list: ['JWT authentication', 'RBAC authorization and scopes (Sentinel)', 'Rate limiting', 'AES-256-GCM encryption', 'PBKDF2 key derivation', 'Android Keystore', 'Biometric authentication (BiometricPrompt)', 'Web application security'] },
+          { heading: 'BACKEND & CLOUD', list: ['Node.js with Express', 'Go with Chi', 'REST API design', 'PostgreSQL', 'Redis', 'Firebase Auth and Firestore', 'AWS (the basics)', 'Hosting on Render'] },
+          { heading: 'HOW I WORK', list: ['Git and GitHub', 'CI with GitHub Actions', 'Docker', 'Code reviews', 'Build and release pipelines (EAS Build)', 'Linux'] }
         ]
       },
       links: []
@@ -300,23 +300,23 @@ window.CASE = {
     {
       id: 'sentinel',
       type: 'folder',
-      label: 'PENDING / UPCOMING',
+      label: 'EXHIBIT C',
       icon: 'eye',
       title: 'Sentinel',
       summary: 'A Go service that answers "can this user do this?" with allow or deny. Anything not granted is denied.',
       tags: ['GO', 'RBAC', 'POSTGRES', 'REDIS'],
-      status: 'PLANNED: JAN 2027',
+      status: 'BUILT: 2026',
       preview: [
         ['LANGUAGE', 'Go'],
         ['TYPE', 'RBAC authorization microservice'],
         ['STORAGE', 'PostgreSQL, Redis cache'],
-        ['PLANNED', 'Jan 2027']
+        ['TESTS', '570+, about 90% coverage']
       ],
       redacted: true,
       x: 2350, y: 1500, w: 480, h: 460, rot: -2,
       fixture: 'pin', pinColor: 'steel', pin: { x: 0.8, y: 0.04 },
-      stamps: [{ text: 'CLASSIFIED: IN DEVELOPMENT', tone: 'red', rot: -8, at: [0.5, 0.86] }],
-      vertical: '開発中',
+      stamps: [{ text: 'CLASSIFIED: ON GITHUB', tone: 'red', rot: -8, at: [0.5, 0.86] }],
+      vertical: '開発完了',
       zoomFocus: 1.4,
       detail: {
         sections: [
@@ -325,24 +325,29 @@ window.CASE = {
             text: 'Sentinel is a Go microservice that other services call to ask one question: can user X do action Y on resource Z? It replies with allow or deny plus a reason, and anything that has not been explicitly granted is denied.'
           },
           {
-            heading: 'HOW IT WORKS',
-            list: [
-              'A JSON HTTP API for managing roles, resources and permissions, granting permissions to roles and assigning roles to users',
-              'One authorize endpoint returns the decision and writes it to an append-only audit log',
-              'Every route under /v1 needs a signed JWT'
-            ]
-          },
-          {
-            heading: 'STATUS',
+            heading: 'AT A GLANCE',
             rows: [
               ['Language', 'Go'],
               ['Type', 'RBAC authorization microservice'],
-              ['Planned', 'Jan 2027']
+              ['Year', '2026'],
+              ['Tests', '570+ at about 89.9% coverage']
             ]
           },
           {
-            heading: 'CACHING',
-            text: 'Decisions are cached in Redis using the cache-aside pattern. Whenever a policy changes, a generation counter moves forward once the database commit has landed, so every older cached entry stops matching at once. If Redis goes down, requests fall back to PostgreSQL and the service keeps running.'
+            heading: 'HOW IT WORKS',
+            list: [
+              'A JSON API with 19 authenticated endpoints for roles, resources, permissions, grants and role assignments',
+              'One authorize endpoint returns the decision and writes it to an append-only audit log',
+              'Decisions are cached in Redis using the cache-aside pattern. Whenever a policy changes, a generation counter moves forward once the database commit has landed, so every older entry stops matching at once',
+              'If Redis goes down, requests fall back to PostgreSQL and the service keeps running'
+            ]
+          },
+          {
+            heading: 'ACCESS CONTROL AND ABUSE PROTECTION',
+            list: [
+              'Every route needs a signed JWT and a scope inside it (authorize, read or admin), so a caller that only asks questions cannot change policy. A route with no scope declared answers 403, and a test fails if one is added without it',
+              'Rate limiting in two layers: per client IP before authentication, and per caller after it, with bounded memory and a fixed 429 response'
+            ]
           },
           {
             heading: 'SECURITY DESIGN',
@@ -354,19 +359,20 @@ window.CASE = {
             ]
           },
           {
-            heading: 'TESTING',
-            text: 'Unit tests, store tests against a real PostgreSQL, and full-stack integration tests that run against Postgres and Redis, including with the cache switched off and with Redis unreachable. Local benchmarks showed the cache saving under 10% per decision, since container round trips dominate, so I don’t claim a big speed-up.'
+            heading: 'TESTING AND CI',
+            text: 'Over 570 tests at roughly 90% coverage, including integration tests against real PostgreSQL and Redis, with the cache switched off and with Redis unreachable. A GitHub Actions pipeline runs the race detector, govulncheck and gosec on every push. Those tools caught a reachable vulnerability in a dependency (golang.org/x/text) and a log-injection issue, and I fixed both. Local benchmarks showed the cache saving under 10% per decision, since container round trips dominate, so I don’t claim a big speed-up.'
           },
           {
             heading: 'KNOWN LIMITS',
             list: [
               'No role hierarchies, deny rules or wildcard permissions: access is an exact match on role, action and resource',
-              'HS256 with a shared secret only, so no RS256 or key rotation yet',
-              'Any valid token can change policy; per-caller permissions are future work',
-              'Single instance, with no rate limiting or pagination yet'
+              'Tokens use HS256 with a shared secret, so anyone holding the secret can mint any scope. It has to be treated like an admin credential. RS256 and key rotation are future work',
+              'Scopes are coarse (three for the whole API), and there is no token revocation',
+              'Single instance: the rate limits and the cache failure handling live in memory, and behind a proxy all clients would share one IP budget until a trusted-proxy design exists',
+              'List endpoints have no pagination yet'
             ]
           },
-          { heading: 'BUILT WITH', list: ['Go', 'Chi', 'PostgreSQL (pgx, raw SQL)', 'Redis (go-redis)', 'golang-migrate', 'Docker Compose'] }
+          { heading: 'BUILT WITH', list: ['Go', 'Chi', 'PostgreSQL (pgx, raw SQL)', 'Redis (go-redis)', 'golang-migrate', 'Docker Compose', 'GitHub Actions'] }
         ]
       },
       links: [
